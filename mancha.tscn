@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://i25n4wq8tyql"]
+
+[ext_resource type="Script" uid="uid://bw1ixnbqkvkvj" path="res://mancha.gd" id="1_gyg3d"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6b251"]
+size = Vector2(40, 40)
+
+[node name="Mancha" type="Area2D" unique_id=1343118588]
+script = ExtResource("1_gyg3d")
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=794434980]
+shape = SubResource("RectangleShape2D_6b251")
