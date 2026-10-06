@@ -40,6 +40,7 @@ var velocidad: Vector2 = Vector2.ZERO
 var _tiempo: float = 0.0
 
 @onready var _sprite: AnimatedSprite2D = $AnimatedSprite2D
+@onready var _suelo: SueloManager = get_tree().get_first_node_in_group("suelo") as SueloManager
 
 
 func _physics_process(delta: float) -> void:
@@ -117,10 +118,7 @@ func dejar_mancha() -> void:
 	pinturas_disponibles -= 1
 	print("Pinturas restantes: ", pinturas_disponibles)
 
-	if mancha_escena:
-		# 1. Creamos la mancha
-		var nueva_mancha = mancha_escena.instantiate()
-		# 2. La ponemos exactamente donde está el fantasma en este momento
-		nueva_mancha.global_position = global_position
-		# 3. La soltamos en el mundo para que se quede ahí pintando
-		get_parent().add_child(nueva_mancha)
+	# SCRUM-04: en vez de instanciar una Mancha suelta, se tiñe la celda del
+	# TileMap que está bajo el fantasma.
+	if _suelo:
+		_suelo.pintar(global_position)
