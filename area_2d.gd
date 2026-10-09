@@ -30,6 +30,7 @@ extends Area2D
 ## Margen interno respecto a los límites (para que el sprite no se corte).
 @export var margen_limites: float = 24.0
 
+var inmune: bool = false	
 ## Pon en false para bloquear el movimiento (ej. Stun de 3 s).
 var movimiento_habilitado: bool = true
 
@@ -122,3 +123,26 @@ func dejar_mancha() -> void:
 	# TileMap que está bajo el fantasma.
 	if _suelo:
 		_suelo.pintar(global_position)
+		
+func aplicar_aturdimiento() -> bool:
+	if inmune or not movimiento_habilitado:
+		return false
+		
+	# 1. Aturdimiento
+	movimiento_habilitado = false
+	modulate = Color(0.4, 0.4, 0.4) # Se oscurece al estar aturdido
+	
+	await get_tree().create_timer(3.0).timeout
+	
+	# 2. Despierta con inmunidad
+	movimiento_habilitado = true
+	inmune = true
+	modulate = Color(1, 1, 1, 0.5) # Semitransparente por la inmunidad
+	
+	await get_tree().create_timer(1.5).timeout
+	
+	# 3. Fin de inmunidad
+	inmune = false
+	modulate = Color(1, 1, 1, 1) # Vuelve a su color normal
+	
+	return true

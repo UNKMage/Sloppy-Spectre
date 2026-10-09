@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://d12ch4vr7k737"]
+
+[ext_resource type="Script" uid="uid://3uexhikcf1ko" path="res://limpiador.gd" id="1_juu1p"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_af0o8"]
+radius = 14.0
+
+[node name="Limpiador" type="CharacterBody2D" unique_id=1166426898]
+motion_mode = 1
+script = ExtResource("1_juu1p")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1443672606]
+shape = SubResource("CircleShape2D_af0o8")
+
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=1299844175]

@@ -7,7 +7,8 @@ extends Node2D
 
 ## Se emite cuando una celda NUEVA se tiñe de ectoplasma.
 signal celda_pintada(posicion_mapa: Vector2i, total_celdas_sucias: int)
-
+#Se emite cuando una celda se limpia
+signal celda_limpiada(posicion_mapa: Vector2i, total_celdas_sucias: int)
 ## ID de la fuente (atlas) en suelo_tileset.tres.
 @export var source_id: int = 0
 ## Coordenadas del tile de suelo limpio dentro del atlas.
@@ -72,3 +73,36 @@ func _rellenar_suelo_provisional() -> void:
 	for x in tamano_mapa.x:
 		for y in tamano_mapa.y:
 			_capa_suelo.set_cell(Vector2i(x, y), source_id, atlas_suelo)
+
+## Devuelve la posición global del centro de la celda sucia más cercana, o null si está todo limpio.
+func obtener_posicion_sucia_mas_cercana(origen_global: Vector2) -> Variant:
+	if _celdas_sucias.is_empty():
+		return null
+		
+	# Nota: Asegúrate de que el nombre del nodo sea exactamente $CapaEctoplasma
+	var capa = $CapaEctoplasma
+	var pos_mapa_origen = capa.local_to_map(capa.to_local(origen_global))
+	
+	var celda_mas_cercana: Vector2i
+	var distancia_minima = INF
+	
+	# Buscamos iterando las celdas sucias registradas
+	for celda in _celdas_sucias.keys():
+		var dist = Vector2(pos_mapa_origen).distance_squared_to(Vector2(celda))
+		if dist < distancia_minima:
+			distancia_minima = dist
+			celda_mas_cercana = celda
+			
+	var pos_local = capa.map_to_local(celda_mas_cercana)
+	return capa.to_global(pos_local)
+
+## Borra el ectoplasma de la coordenada global dada y lo quita del registro.
+func limpiar(pos_global: Vector2) -> void:
+	var capa = $CapaEctoplasma
+	var pos_local = capa.to_local(pos_global)
+	var pos_mapa = capa.local_to_map(pos_local)
+	
+	if _celdas_sucias.has(pos_mapa):
+		_celdas_sucias.erase(pos_mapa)
+		capa.erase_cell(pos_mapa)
+		celda_limpiada.emit(pos_mapa, _celdas_sucias.size())

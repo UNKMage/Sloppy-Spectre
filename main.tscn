@@ -4,6 +4,12 @@
 [ext_resource type="PackedScene" uid="uid://ck0uog3mxeca3" path="res://area_2d.tscn" id="2_h2yge"]
 [ext_resource type="TileSet" uid="uid://dqoiueixjcvs4" path="res://suelo_tileset.tres" id="3_1bvp3"]
 [ext_resource type="PackedScene" path="res://suelo.tscn" id="3_suelo"]
+[ext_resource type="PackedScene" uid="uid://d12ch4vr7k737" path="res://limpiador.tscn" id="5_lquwl"]
+
+[sub_resource type="NavigationPolygon" id="NavigationPolygon_af0o8"]
+vertices = PackedVector2Array(1150, 630, 10, 630, 10, 10, 1150, 10)
+polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2, 3)])
+outlines = Array[PackedVector2Array]([PackedVector2Array(0, 0, 1160, 0, 1160, 640, 0, 640)])
 
 [node name="main" type="Node" unique_id=317017916]
 
@@ -16,6 +22,12 @@ tile_set = ExtResource("3_1bvp3")
 
 [node name="Portal" parent="." unique_id=1254418760 instance=ExtResource("1_0xm2m")]
 position = Vector2(576, 324)
+
+[node name="navegacion" type="NavigationRegion2D" parent="." unique_id=825874859]
+navigation_polygon = SubResource("NavigationPolygon_af0o8")
+
+[node name="Limpiador" parent="." unique_id=1166426898 instance=ExtResource("5_lquwl")]
+position = Vector2(1136, 616)
 
 [node name="ghost" parent="." unique_id=1140925187 instance=ExtResource("2_h2yge")]
 inclinacion_max_grados = 0.0
