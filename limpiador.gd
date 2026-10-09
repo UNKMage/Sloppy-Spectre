@@ -19,6 +19,18 @@ extends CharacterBody2D
 ## Dibuja los círculos de detección y pérdida alrededor del Limpiador.
 @export var mostrar_rangos: bool = true
 
+@export_group("Linterna")
+## Si es false, la linterna está apagada y no aturde.
+@export var linterna_encendida: bool = true
+## Apertura total del cono de luz, en grados.
+@export_range(10.0, 180.0, 1.0) var angulo_cono_grados: float = 60.0
+## Alcance de la luz, en píxeles.
+@export var alcance_linterna: float = 220.0
+## Capas físicas que bloquean la luz (por defecto la capa 3, "paredes").
+@export_flags_2d_physics var mascara_obstaculos: int = 4
+## Qué tan rápido gira la linterna hacia donde camina (más alto = gira más rápido).
+@export var suavidad_giro_linterna: float = 10.0
+
 @export_group("Limpieza")
 ## Segundos que tarda en limpiar una mancha al llegar a ella
 @export var tiempo_por_mancha: float = 1.0
@@ -34,6 +46,8 @@ var _jugador_en_portal: bool = false
 enum Estado { PATRULLANDO, PERSIGUIENDO, ASPIRANDO }
 
 var estado: Estado = Estado.PATRULLANDO
+## Hacia dónde apunta la linterna (se actualiza según el movimiento).
+var direccion_mirada: Vector2 = Vector2.DOWN
 var _tiempo_decision: float = 0.0
 var _tiempo_sin_ver: float = 0.0
 var _navegacion_lista: bool = false
@@ -64,9 +78,12 @@ func _physics_process(delta: float) -> void:
 	if not _navegacion_lista:
 		return
 	if _jugador and _distancia_al_jugador() <= 30.0:
-		if _jugador.has_method("aplicar_aturdimiento") and not _jugador.get("inmune") and _jugador.get("movimiento_habilitado"):
-			_jugador.aplicar_aturdimiento()
-			cambiar_estado(Estado.ASPIRANDO)
+		_intentar_aturdir()
+
+	# SCRUM-09: la linterna aturde a Spooky si lo alumbra.
+	_actualizar_direccion_mirada(delta)
+	if linterna_encendida and _spooky_en_cono_de_luz():
+		_intentar_aturdir()
 	match estado:
 		Estado.PATRULLANDO:
 			_patrullar()
@@ -75,6 +92,53 @@ func _physics_process(delta: float) -> void:
 		Estado.ASPIRANDO:
 			_aspirar(delta)
 	_mover_por_la_ruta()
+
+## Aturde a Spooky (3 s, lo hace su propio script) salvo que ya esté aturdido o inmune.
+## Es la misma lógica que ya usaba el contacto directo, ahora compartida con la linterna.
+func _intentar_aturdir() -> void:
+	if _jugador and _jugador.has_method("aplicar_aturdimiento") and not _jugador.get("inmune") and _jugador.get("movimiento_habilitado"):
+		_jugador.aplicar_aturdimiento()
+		cambiar_estado(Estado.ASPIRANDO)
+
+
+## La linterna apunta hacia donde se mueve el Limpiador; si está quieto, conserva la última dirección.
+func _actualizar_direccion_mirada(delta: float) -> void:
+	if velocity.length() < 5.0:
+		return
+	var angulo := lerp_angle(direccion_mirada.angle(), velocity.angle(), clampf(suavidad_giro_linterna * delta, 0.0, 1.0))
+	direccion_mirada = Vector2.from_angle(angulo)
+	queue_redraw()  # el cono dibujado sigue a la linterna
+
+
+## ¿Está Spooky dentro del cono de luz? Revisa alcance, ángulo y que ninguna pared tape la luz.
+func _spooky_en_cono_de_luz() -> bool:
+	# El Portal es zona segura: dentro de él la linterna no lo detecta.
+	if _jugador == null or _jugador_en_portal:
+		return false
+
+	var hacia_spooky := _jugador.global_position - global_position
+	var distancia := hacia_spooky.length()
+	if distancia > alcance_linterna:
+		return false
+
+	# Ángulo entre hacia dónde mira la linterna y hacia dónde está Spooky.
+	if distancia > 0.001:
+		var mitad_cono := deg_to_rad(angulo_cono_grados) * 0.5
+		if absf(direccion_mirada.angle_to(hacia_spooky)) > mitad_cono:
+			return false
+
+	return _luz_sin_obstaculos()
+
+
+## Rayo del Limpiador a Spooky: si choca con una pared, la luz no llega.
+## Solo se ejecuta cuando Spooky ya está dentro del alcance y del ángulo (barato).
+func _luz_sin_obstaculos() -> bool:
+	if mascara_obstaculos == 0:
+		return true
+	var consulta := PhysicsRayQueryParameters2D.create(global_position, _jugador.global_position, mascara_obstaculos)
+	consulta.exclude = [get_rid()]  # que el rayo no choque con el propio Limpiador
+	return get_world_2d().direct_space_state.intersect_ray(consulta).is_empty()
+
 
 func cambiar_estado(nuevo: Estado) -> void:
 	if nuevo == estado:
@@ -183,6 +247,9 @@ func _mover_por_la_ruta() -> void:
 	move_and_slide()
 
 func _draw() -> void:
+	if linterna_encendida:
+		_dibujar_cono()
+
 	var color: Color
 	match estado:
 		Estado.PATRULLANDO:
@@ -196,3 +263,15 @@ func _draw() -> void:
 	if mostrar_rangos:
 		draw_arc(Vector2.ZERO, rango_deteccion, 0.0, TAU, 64, Color(1, 1, 1, 0.25), 1.0)
 		draw_arc(Vector2.ZERO, rango_perdida, 0.0, TAU, 64, Color(1, 0.4, 0.4, 0.2), 1.0)
+
+
+## Dibuja el cono de luz (provisional, hasta que haya arte).
+func _dibujar_cono() -> void:
+	var mitad_cono := deg_to_rad(angulo_cono_grados) * 0.5
+	var centro := direccion_mirada.angle()
+	var puntos := PackedVector2Array([Vector2.ZERO])
+	for i in range(17):
+		var angulo := centro - mitad_cono + (mitad_cono * 2.0) * i / 16.0
+		puntos.append(Vector2.from_angle(angulo) * alcance_linterna)
+	draw_colored_polygon(puntos, Color(1.0, 0.95, 0.5, 0.22))
+	draw_polyline(PackedVector2Array([puntos[1], Vector2.ZERO, puntos[17]]), Color(1.0, 0.95, 0.5, 0.6), 1.5)
