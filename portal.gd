@@ -8,7 +8,7 @@ signal recarga_completa
 
 @export var radio: float = 48.0
 @export var tiempo_recarga: float = 5 # Segundos para llenar el tanque desde 0
-@export var capacidad: int = 20
+@export var capacidad: int = 100
 
 var _jugador: Area2D = null
 var _acumulado: float = 0.0
@@ -36,6 +36,10 @@ func _process(delta: float) -> void:
 	if enteras > 0:
 		_acumulado -= enteras
 		_jugador.pinturas_disponibles = mini(capacidad, _jugador.pinturas_disponibles + enteras)
+		
+		if _jugador.has_signal("pinturas_actualizadas"):
+			_jugador.emit_signal("pinturas_actualizadas", _jugador.pinturas_disponibles)
+		
 		if _jugador.pinturas_disponibles >= capacidad:
 			recarga_completa.emit()
 

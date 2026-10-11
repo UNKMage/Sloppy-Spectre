@@ -1,6 +1,7 @@
 [gd_scene format=4 uid="uid://cruq01vilpoy7"]
 
 [ext_resource type="PackedScene" uid="uid://cvfwxh4d3oy7h" path="res://portal.tscn" id="1_0xm2m"]
+[ext_resource type="PackedScene" uid="uid://xl7r0nt3sod1" path="res://hud.tscn" id="1_7mycd"]
 [ext_resource type="PackedScene" uid="uid://ck0uog3mxeca3" path="res://area_2d.tscn" id="2_h2yge"]
 [ext_resource type="TileSet" uid="uid://dqoiueixjcvs4" path="res://suelo_tileset.tres" id="3_1bvp3"]
 [ext_resource type="PackedScene" path="res://suelo.tscn" id="3_suelo"]
@@ -12,6 +13,8 @@ polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2, 3)])
 outlines = Array[PackedVector2Array]([PackedVector2Array(0, 0, 1160, 0, 1160, 640, 0, 640)])
 
 [node name="main" type="Node" unique_id=317017916]
+
+[node name="HUD" parent="." unique_id=537810001 instance=ExtResource("1_7mycd")]
 
 [node name="Layer0" type="TileMapLayer" parent="." unique_id=2086103088]
 use_parent_material = true
@@ -31,3 +34,5 @@ position = Vector2(1136, 616)
 
 [node name="ghost" parent="." unique_id=1140925187 instance=ExtResource("2_h2yge")]
 inclinacion_max_grados = 0.0
+
+[connection signal="pinturas_actualizadas" from="ghost" to="HUD" method="_on_ghost_pinturas_actualizadas"]

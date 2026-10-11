@@ -1,8 +1,5 @@
 extends Area2D
-## Spooky (fantasma). Movimiento omnidireccional con levitación fluida.
-## Sin colisiones de terreno (GDD): se mueve libre en vista superior 2D.
-
-@export var mancha_escena: PackedScene # Arrastra mancha.tscn aquí en el Inspector
+@export var mancha_escena: PackedScene
 
 @export_group("Movimiento")
 ## Velocidad máxima en px/s.
@@ -30,12 +27,15 @@ extends Area2D
 ## Margen interno respecto a los límites (para que el sprite no se corte).
 @export var margen_limites: float = 24.0
 
+# Delcaración de señal personalizada. Gasto de pintura
+signal pinturas_actualizadas(cantidad_restante: int)
+
 var inmune: bool = false	
 ## Pon en false para bloquear el movimiento (ej. Stun de 3 s).
 var movimiento_habilitado: bool = true
 
 #Valor de prueba. Si se agrega 100 ya funciona también.
-var pinturas_disponibles: int = 20
+var pinturas_disponibles: int = 100
 
 var velocidad: Vector2 = Vector2.ZERO
 var _tiempo: float = 0.0
@@ -111,19 +111,19 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ensuciar"):
 		if pinturas_disponibles > 0:
 			dejar_mancha()
-		else:
-			print("¡Te has quedado sin pintura!")
 
 
 func dejar_mancha() -> void:
 	pinturas_disponibles -= 1
-	print("Pinturas restantes: ", pinturas_disponibles)
+	
+	# Emitir la señal personalizada pasando el nuevo valor
+	emit_signal("pinturas_actualizadas", pinturas_disponibles)
 
 	# SCRUM-04: en vez de instanciar una Mancha suelta, se tiñe la celda del
 	# TileMap que está bajo el fantasma.
 	if _suelo:
 		_suelo.pintar(global_position)
-		
+
 func aplicar_aturdimiento() -> bool:
 	if inmune or not movimiento_habilitado:
 		return false

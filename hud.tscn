@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://xl7r0nt3sod1"]
+
+[ext_resource type="Script" uid="uid://do82b7x5qbvco" path="res://hud.gd" id="1_37p78"]
+
+[node name="HUD" type="CanvasLayer" unique_id=537810001]
+script = ExtResource("1_37p78")
+
+[node name="ProgressBar" type="ProgressBar" parent="." unique_id=1754229247]
+offset_right = 280.0
+offset_bottom = 27.0
+step = 1.0
+value = 100.0
+
+[node name="Label" type="Label" parent="." unique_id=821535980]
+offset_left = 103.0
+offset_top = 30.0
+offset_right = 173.0
+offset_bottom = 53.0
+text = "Manchas"
