@@ -8,7 +8,7 @@ extends Area2D
 @export var aceleracion: float = 1100.0
 ## Qué tan rápido se frena al soltar las teclas (px/s²). Más bajo = más "flotante".
 @export var desaceleracion: float = 700.0
-## Extra de frenado al invertir dirección bruscamente (gidsros más precisos para esquivar).
+## Extra de frenado al invertir dirección bruscamente (giros más precisos para esquivar).
 @export var factor_giro: float = 1.6
 
 @export_group("Levitación")
@@ -27,14 +27,14 @@ extends Area2D
 ## Margen interno respecto a los límites (para que el sprite no se corte).
 @export var margen_limites: float = 24.0
 
-# Delcaración de señal personalizada. Gasto de pintura
+# Declaración de señal personalizada. Gasto de pintura
 signal pinturas_actualizadas(cantidad_restante: int)
 
-var inmune: bool = false	
+var inmune: bool = false    
 ## Pon en false para bloquear el movimiento (ej. Stun de 3 s).
 var movimiento_habilitado: bool = true
 
-#Valor de prueba. Si se agrega 100 ya funciona también.
+# Valor de prueba. Si se agrega 100 ya funciona también.
 var pinturas_disponibles: int = 100
 
 var velocidad: Vector2 = Vector2.ZERO
@@ -100,7 +100,7 @@ func _animar_levitacion(delta: float) -> void:
 	# Inclinación según la velocidad horizontal.
 	var inclinacion_objetivo := (velocidad.x / velocidad_maxima) * deg_to_rad(inclinacion_max_grados)
 	_sprite.rotation = lerp_angle(_sprite.rotation, inclinacion_objetivo, clampf(suavidad_inclinacion * delta, 0.0, 1.0))
-	   # Dentro de _animar_levitacion()
+	
 	if absf(velocidad.x) > 10.0:
 		_sprite.flip_h = velocidad.x > 0.0
 
@@ -123,6 +123,7 @@ func dejar_mancha() -> void:
 	# TileMap que está bajo el fantasma.
 	if _suelo:
 		_suelo.pintar(global_position)
+
 
 func aplicar_aturdimiento() -> bool:
 	if inmune or not movimiento_habilitado:

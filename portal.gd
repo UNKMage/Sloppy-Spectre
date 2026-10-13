@@ -7,7 +7,7 @@ signal jugador_salio
 signal recarga_completa
 
 @export var radio: float = 48.0
-@export var tiempo_recarga: float = 5 # Segundos para llenar el tanque desde 0
+@export var tiempo_recarga: float = 5.0 # Segundos para llenar el tanque desde 0
 @export var capacidad: int = 100
 
 var _jugador: Area2D = null
