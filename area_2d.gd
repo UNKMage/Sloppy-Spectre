@@ -114,7 +114,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func dejar_mancha() -> void:
-	pinturas_disponibles -= 1
+	pinturas_disponibles -= 5
 	
 	# Emitir la señal personalizada pasando el nuevo valor
 	emit_signal("pinturas_actualizadas", pinturas_disponibles)
