@@ -4,6 +4,8 @@ extends CanvasLayer
 @onready var label_tiempo: Label = $Label2
 @onready var label_game_over: Label = $LabelGameOver
 @onready var label_suciedad: Label = get_node_or_null("LabelSuciedad")
+@onready var barra_suciedad: ProgressBar = get_node_or_null("ProgressBarSuciedad")
+@onready var reintentar: Button = get_node_or_null("ButtonReintentar")
 
 var tiempo_restante: float = 120.0
 var cronometro_activo: bool = true
@@ -11,6 +13,8 @@ var cronometro_activo: bool = true
 
 func _ready() -> void:
 	actualizar_etiqueta_tiempo()
+	if reintentar and not reintentar.pressed.is_connected(_on_button_reintentar_pressed):
+		reintentar.pressed.connect(_on_button_reintentar_pressed)
 
 
 func _process(delta: float) -> void:
@@ -32,6 +36,8 @@ func actualizar_etiqueta_tiempo() -> void:
 func terminar_partida() -> void:
 	if label_game_over:
 		label_game_over.visible = true
+	if reintentar:
+		reintentar.visible = true
 	get_tree().paused = true
 
 
@@ -45,10 +51,16 @@ func _on_ghost_pinturas_actualizadas(cantidad_restante: int) -> void:
 
 ## Función para KIBO-17: muestra el porcentaje en enteros sin decimales
 func actualizar_porcentaje_suciedad(porcentaje: float, _actuales: int, _totales: int) -> void:
-	if label_suciedad:
-		label_suciedad.text = "Suciedad: %d%%" % int(porcentaje)
+	if barra_suciedad:
+		barra_suciedad.value = porcentaje
 
 
-## Si conectaste la señal con el nombre automático por defecto, redirige a la misma función
 func _on_suelo_suciedad_actualizada(porcentaje: float, celdas_sucias: int, total_celdas: int) -> void:
 	actualizar_porcentaje_suciedad(porcentaje, celdas_sucias, total_celdas)
+	
+# Solo reinicia la escena actual. Puede servir pero también puede quitarse si después no es necesaria.
+func _on_button_reintentar_pressed() -> void:
+	# 1. IMPORTANTE: Quitar la pausa antes de recargar, de lo contrario la escena se quedará congelada
+	get_tree().paused = false
+	# 2. Recarga la escena actual desde cero
+	get_tree().reload_current_scene()
