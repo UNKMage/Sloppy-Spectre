@@ -228,6 +228,7 @@ mancha_escena = null
 
 [node name="HUD" parent="." unique_id=537810001 instance=ExtResource("4_320mp")]
 
+[connection signal="suciedad_actualizada" from="Suelo" to="HUD" method="actualizar_porcentaje_suciedad"]
 [connection signal="pinturas_actualizadas" from="ghost" to="HUD" method="_on_ghost_pinturas_actualizadas"]
 
 [editable path="Suelo"]

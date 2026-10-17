@@ -33,3 +33,9 @@ offset_right = 737.0
 offset_bottom = 361.0
 theme_override_font_sizes/font_size = 60
 text = "Game Over"
+
+[node name="LabelSuciedad" type="Label" parent="." unique_id=92646070]
+offset_left = 1008.0
+offset_top = 8.0
+offset_right = 1048.0
+offset_bottom = 31.0
