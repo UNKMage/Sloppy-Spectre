@@ -40,13 +40,17 @@ var pinturas_disponibles: int = 100
 var velocidad: Vector2 = Vector2.ZERO
 var _tiempo: float = 0.0
 
+## Capa física 3 ("paredes") = valor 4: es la que Spooky no puede atravesar.
+const CAPA_PAREDES := 4
+
 @onready var _sprite: AnimatedSprite2D = $AnimatedSprite2D
+@onready var _colision: CollisionShape2D = $CollisionShape2D
 @onready var _suelo: SueloManager = get_tree().get_first_node_in_group("suelo") as SueloManager
 
 
 func _physics_process(delta: float) -> void:
 	_actualizar_velocidad(delta)
-	global_position += velocidad * delta
+	_mover_chocando_con_paredes(velocidad * delta)
 	_aplicar_limites()
 
 
@@ -70,6 +74,40 @@ func _actualizar_velocidad(delta: float) -> void:
 	else:
 		# Sin input (o aturdido): se desliza suavemente hasta detenerse.
 		velocidad = velocidad.move_toward(Vector2.ZERO, desaceleracion * delta)
+
+
+## Mueve a Spooky sin atravesar paredes. Spooky es un Area2D (no se mueve solo con la física),
+## así que antes de cada paso se pregunta al motor: "¿mi forma chocaría con una pared ahí?".
+func _mover_chocando_con_paredes(desplazamiento: Vector2) -> void:
+	if desplazamiento == Vector2.ZERO:
+		return
+	# Si ya está dentro de una pared (por ejemplo, aparece encima de una), se mueve libre
+	# para poder salir y no quedar atrapado.
+	if _choca_con_pared(Vector2.ZERO):
+		global_position += desplazamiento
+		return
+	# Primero el paso en X y luego el de Y, por separado: si uno está bloqueado el otro sigue,
+	# y así Spooky resbala a lo largo de la pared en vez de pegarse a ella.
+	var paso_x := Vector2(desplazamiento.x, 0.0)
+	if _choca_con_pared(paso_x):
+		velocidad.x = 0.0
+	else:
+		global_position += paso_x
+	var paso_y := Vector2(0.0, desplazamiento.y)
+	if _choca_con_pared(paso_y):
+		velocidad.y = 0.0
+	else:
+		global_position += paso_y
+
+
+## ¿Chocaría la forma de Spooky con una pared si se moviera `desplazamiento`?
+func _choca_con_pared(desplazamiento: Vector2) -> bool:
+	var consulta := PhysicsShapeQueryParameters2D.new()
+	consulta.shape = _colision.shape
+	consulta.transform = _colision.global_transform.translated(desplazamiento)
+	consulta.collision_mask = CAPA_PAREDES
+	consulta.collide_with_areas = false  # solo cuerpos sólidos (las paredes)
+	return not get_world_2d().direct_space_state.intersect_shape(consulta, 1).is_empty()
 
 
 func _aplicar_limites() -> void:

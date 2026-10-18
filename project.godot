@@ -11,9 +11,13 @@ config_version=5
 [application]
 
 config/name="Sloppy_Spectre"
-run/main_scene="uid://cruq01vilpoy7"
+run/main_scene="res://menu_principal.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
+
+[autoload]
+
+VolverAlMenu="*res://volver_al_menu.gd"
 
 [display]
 

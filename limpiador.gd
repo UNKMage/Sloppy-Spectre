@@ -48,6 +48,13 @@ enum Estado { PATRULLANDO, PERSIGUIENDO, ASPIRANDO }
 var estado: Estado = Estado.PATRULLANDO
 ## Hacia dónde apunta la linterna (se actualiza según el movimiento).
 var direccion_mirada: Vector2 = Vector2.DOWN
+
+## Cuántos rayos se lanzan para dibujar el cono (más = borde más fino contra las paredes).
+const RAYOS_CONO := 24
+## Puntos del cono ya recortado por las paredes (coordenadas locales).
+var _puntos_cono: PackedVector2Array = PackedVector2Array()
+var _pos_ultimo_cono: Vector2 = Vector2.INF
+var _dir_ultimo_cono: Vector2 = Vector2.ZERO
 var _tiempo_decision: float = 0.0
 var _tiempo_sin_ver: float = 0.0
 var _navegacion_lista: bool = false
@@ -82,6 +89,8 @@ func _physics_process(delta: float) -> void:
 
 	# SCRUM-09: la linterna aturde a Spooky si lo alumbra.
 	_actualizar_direccion_mirada(delta)
+	if linterna_encendida:
+		_actualizar_cono_visible()
 	if linterna_encendida and _spooky_en_cono_de_luz():
 		_intentar_aturdir()
 	match estado:
@@ -107,7 +116,6 @@ func _actualizar_direccion_mirada(delta: float) -> void:
 		return
 	var angulo := lerp_angle(direccion_mirada.angle(), velocity.angle(), clampf(suavidad_giro_linterna * delta, 0.0, 1.0))
 	direccion_mirada = Vector2.from_angle(angulo)
-	queue_redraw()  # el cono dibujado sigue a la linterna
 
 
 ## ¿Está Spooky dentro del cono de luz? Revisa alcance, ángulo y que ninguna pared tape la luz.
@@ -265,13 +273,43 @@ func _draw() -> void:
 		draw_arc(Vector2.ZERO, rango_perdida, 0.0, TAU, 64, Color(1, 0.4, 0.4, 0.2), 1.0)
 
 
-## Dibuja el cono de luz (provisional, hasta que haya arte).
-func _dibujar_cono() -> void:
+## Lanza rayos a lo largo del cono: donde un rayo choca con una pared, la luz se corta.
+## Se ejecuta en _physics_process (el espacio físico solo se puede consultar ahí)
+## y solo recalcula si el Limpiador se movió o giró.
+func _actualizar_cono_visible() -> void:
+	if global_position == _pos_ultimo_cono and direccion_mirada == _dir_ultimo_cono:
+		return
+	_pos_ultimo_cono = global_position
+	_dir_ultimo_cono = direccion_mirada
+
 	var mitad_cono := deg_to_rad(angulo_cono_grados) * 0.5
 	var centro := direccion_mirada.angle()
+	var espacio := get_world_2d().direct_space_state
 	var puntos := PackedVector2Array([Vector2.ZERO])
-	for i in range(17):
-		var angulo := centro - mitad_cono + (mitad_cono * 2.0) * i / 16.0
-		puntos.append(Vector2.from_angle(angulo) * alcance_linterna)
-	draw_colored_polygon(puntos, Color(1.0, 0.95, 0.5, 0.22))
-	draw_polyline(PackedVector2Array([puntos[1], Vector2.ZERO, puntos[17]]), Color(1.0, 0.95, 0.5, 0.6), 1.5)
+	for i in range(RAYOS_CONO + 1):
+		var angulo := centro - mitad_cono + (mitad_cono * 2.0) * i / RAYOS_CONO
+		var destino := global_position + Vector2.from_angle(angulo) * alcance_linterna
+		var punto := destino
+		if mascara_obstaculos != 0:
+			var consulta := PhysicsRayQueryParameters2D.create(global_position, destino, mascara_obstaculos)
+			consulta.exclude = [get_rid()]
+			var choque := espacio.intersect_ray(consulta)
+			if not choque.is_empty():
+				punto = choque.position
+		puntos.append(punto - global_position)
+	_puntos_cono = puntos
+	queue_redraw()
+
+
+## Dibuja el cono de luz (provisional, hasta que haya arte).
+## Se dibuja como abanico de triángulos: no falla aunque la luz quede muy corta contra una pared.
+func _dibujar_cono() -> void:
+	if _puntos_cono.size() < 3:
+		return
+	var relleno := Color(1.0, 0.95, 0.5, 0.22)
+	var colores := PackedColorArray([relleno, relleno, relleno])
+	for i in range(1, _puntos_cono.size() - 1):
+		draw_primitive(PackedVector2Array([_puntos_cono[0], _puntos_cono[i], _puntos_cono[i + 1]]), colores, PackedVector2Array())
+	var borde := PackedVector2Array(_puntos_cono)
+	borde.append(Vector2.ZERO)
+	draw_polyline(borde, Color(1.0, 0.95, 0.5, 0.6), 1.5)

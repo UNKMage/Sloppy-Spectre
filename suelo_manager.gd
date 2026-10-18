@@ -95,6 +95,25 @@ func _actualizar_porcentaje_global() -> void:
 	suciedad_actualizada.emit(float(porcentaje_entero), celdas_actuales, celdas_para_100)
 
 
+## Borra el suelo bajo un polígono (en coordenadas globales), por ejemplo el contorno de una pared.
+## Se quitan las celdas cuyo CENTRO queda dentro del polígono. Sin suelo no se puede manchar,
+## así el Limpiador nunca recibe manchas donde no puede entrar.
+func quitar_suelo(contorno_global: PackedVector2Array) -> void:
+	var minimo := contorno_global[0]
+	var maximo := minimo
+	for punto in contorno_global:
+		minimo = minimo.min(punto)
+		maximo = maximo.max(punto)
+	var primera := _capa_suelo.local_to_map(_capa_suelo.to_local(minimo))
+	var ultima := _capa_suelo.local_to_map(_capa_suelo.to_local(maximo))
+	for x in range(primera.x, ultima.x + 1):
+		for y in range(primera.y, ultima.y + 1):
+			var celda := Vector2i(x, y)
+			var centro := _capa_suelo.to_global(_capa_suelo.map_to_local(celda))
+			if Geometry2D.is_point_in_polygon(centro, contorno_global):
+				_capa_suelo.erase_cell(celda)
+
+
 func _rellenar_suelo_provisional() -> void:
 	for x in tamano_mapa.x:
 		for y in tamano_mapa.y:

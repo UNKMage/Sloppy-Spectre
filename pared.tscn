@@ -1,10 +1,7 @@
 [gd_scene format=3 uid="uid://cabw7hnj860tr"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_af0o8"]
-size = Vector2(40, 300)
+[ext_resource type="Script" path="res://pared.gd" id="1_pared"]
 
 [node name="Pared" type="StaticBody2D" unique_id=1946771330]
 collision_layer = 4
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=491255594]
-shape = SubResource("RectangleShape2D_af0o8")
+script = ExtResource("1_pared")
