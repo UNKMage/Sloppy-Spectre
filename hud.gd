@@ -19,6 +19,9 @@ var cronometro_activo: bool = true
 ## true cuando ya se ganó o se perdió (evita terminar dos veces el mismo frame).
 var partida_terminada: bool = false
 
+## Evita reproducir la alerta repetidamente dentro del mismo segundo
+var _ultimo_segundo_alerta: int = -1
+
 var _porcentaje_suciedad: float = 0.0
 ## Al empezar la suciedad es 0%, así que "suciedad = 0" solo cuenta como derrota
 ## si antes hubo manchas (es decir, si los Limpiadores borraron todo).
@@ -44,6 +47,13 @@ func _process(delta: float) -> void:
 	if not cronometro_activo:
 		return
 	tiempo_restante -= delta
+
+	# Sonido de cuenta regresiva en los últimos 10 segundos
+	var seg := int(ceil(tiempo_restante))
+	if seg <= 10 and seg > 0 and seg != _ultimo_segundo_alerta:
+		_ultimo_segundo_alerta = seg
+		SoundManager.reproducir_alerta()
+
 	if tiempo_restante <= 0.0:
 		tiempo_restante = 0.0
 		cronometro_activo = false
@@ -69,6 +79,14 @@ func _finalizar(victoria: bool, motivo: String) -> void:
 	partida_terminada = true
 	cronometro_activo = false
 	get_tree().paused = true
+
+	# Apagar la alerta del timer en cuanto termine la partida (ganes o pierdas)
+	SoundManager.detener_alerta()
+	
+	# Sonido de Game Over si la partida terminó en derrota
+	if not victoria:
+		SoundManager.reproducir_gameover()
+		
 	var pantalla := PANTALLA_FIN.instantiate()
 	add_child(pantalla)
 	pantalla.mostrar(victoria, motivo, _porcentaje_suciedad, tiempo_restante)
@@ -101,7 +119,8 @@ func actualizar_porcentaje_suciedad(porcentaje: float, _actuales: int, _totales:
 
 func _on_suelo_suciedad_actualizada(porcentaje: float, celdas_sucias: int, total_celdas: int) -> void:
 	actualizar_porcentaje_suciedad(porcentaje, celdas_sucias, total_celdas)
-	
+
+
 # Solo reinicia la escena actual. Puede servir pero también puede quitarse si después no es necesaria.
 func _on_button_reintentar_pressed() -> void:
 	# 1. IMPORTANTE: Quitar la pausa antes de recargar, de lo contrario la escena se quedará congelada

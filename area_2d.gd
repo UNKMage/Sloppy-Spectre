@@ -157,6 +157,9 @@ func dejar_mancha() -> void:
 	# Emitir la señal personalizada pasando el nuevo valor
 	emit_signal("pinturas_actualizadas", pinturas_disponibles)
 
+	# Reproducir sonido de disparo/mancha
+	SoundManager.reproducir_disparo()
+
 	# SCRUM-04: en vez de instanciar una Mancha suelta, se tiñe la celda del
 	# TileMap que está bajo el fantasma.
 	if _suelo:
@@ -166,6 +169,9 @@ func dejar_mancha() -> void:
 func aplicar_aturdimiento() -> bool:
 	if inmune or not movimiento_habilitado:
 		return false
+		
+	# Reproducir sonido de aturdimiento
+	SoundManager.reproducir_stun()
 		
 	# 1. Aturdimiento
 	movimiento_habilitado = false
