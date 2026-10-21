@@ -27,6 +27,8 @@ extends Area2D
 ## Margen interno respecto a los límites (para que el sprite no se corte).
 @export var margen_limites: float = 24.0
 
+const COSTO_MANCHA := 5
+
 # Declaración de señal personalizada. Gasto de pintura
 signal pinturas_actualizadas(cantidad_restante: int)
 
@@ -147,23 +149,21 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not movimiento_habilitado:
 		return
 	if event.is_action_pressed("ensuciar"):
-		if pinturas_disponibles > 0:
+		if pinturas_disponibles >= COSTO_MANCHA:
 			dejar_mancha()
 
 
 func dejar_mancha() -> void:
-	pinturas_disponibles -= 5
-	
-	# Emitir la señal personalizada pasando el nuevo valor
+	if _suelo == null:
+		return
+
+	# Si la celda ya estaba sucia, no pasa nada: ni tanque, ni sonido.
+	if _suelo.pintar(global_position) <= 0:
+		return
+
+	pinturas_disponibles -= COSTO_MANCHA
 	emit_signal("pinturas_actualizadas", pinturas_disponibles)
-
-	# Reproducir sonido de disparo/mancha
 	SoundManager.reproducir_disparo()
-
-	# SCRUM-04: en vez de instanciar una Mancha suelta, se tiñe la celda del
-	# TileMap que está bajo el fantasma.
-	if _suelo:
-		_suelo.pintar(global_position)
 
 
 func aplicar_aturdimiento() -> bool:
