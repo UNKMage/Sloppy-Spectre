@@ -1,13 +1,24 @@
 extends CanvasLayer
 ## Contador de FPS. F3 = mostrar/ocultar, F4 = reiniciar estadísticas.
+## Min y Max se calculan sobre el promedio de cada ventana de 1 s, no sobre frames sueltos.
+
+const VENTANA := 1.0  # segundos por muestra
 
 var _label := Label.new()
 
+# Acumulado total (para el promedio real).
 var _frames: int = 0
 var _tiempo_total: float = 0.0
-var _delta_max: float = 0.0   # frame más lento  -> FPS mínimo
-var _delta_min: float = INF   # frame más rápido -> FPS máximo
-var _refresco_texto: float = 0.0
+
+# Ventana en curso.
+var _frames_ventana: int = 0
+var _tiempo_ventana: float = 0.0
+
+# Resultados.
+var _fps_actual: float = 0.0
+var _fps_min: float = INF
+var _fps_max: float = 0.0
+var _peor_frame: float = 0.0  # en segundos
 
 
 func _ready() -> void:
@@ -19,35 +30,40 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	# Las estadísticas se acumulan siempre, aunque el texto esté oculto.
 	_frames += 1
 	_tiempo_total += delta
-	_delta_max = maxf(_delta_max, delta)
-	_delta_min = minf(_delta_min, delta)
+	_frames_ventana += 1
+	_tiempo_ventana += delta
+	_peor_frame = maxf(_peor_frame, delta)
 
-	if not _label.visible:
-		return
-	_refresco_texto -= delta
-	if _refresco_texto <= 0.0:
-		_refresco_texto = 0.25  # actualiza el texto 4 veces por segundo
-		_actualizar_texto()
+	if _tiempo_ventana >= VENTANA:
+		_fps_actual = _frames_ventana / _tiempo_ventana
+		_fps_min = minf(_fps_min, _fps_actual)
+		_fps_max = maxf(_fps_max, _fps_actual)
+		_frames_ventana = 0
+		_tiempo_ventana = 0.0
+		if _label.visible:
+			_actualizar_texto()
 
 
 func _actualizar_texto() -> void:
-	if _frames == 0 or _tiempo_total <= 0.0:
-		return
-	var actual := Engine.get_frames_per_second()
-	var minimo := 1.0 / _delta_max
-	var maximo := 1.0 / _delta_min
 	var promedio := _frames / _tiempo_total
-	_label.text = "FPS: %d\nMin: %d\nMax: %d\nProm: %d" % [actual, minimo, maximo, promedio]
+	_label.text = "FPS: %d\nMin: %d\nMax: %d\nProm: %d\nPeor frame: %.1f ms" % [
+		_fps_actual, _fps_min, _fps_max, promedio, _peor_frame * 1000.0
+	]
 
 
 func reiniciar() -> void:
 	_frames = 0
 	_tiempo_total = 0.0
-	_delta_max = 0.0
-	_delta_min = INF
+	_frames_ventana = 0
+	_tiempo_ventana = 0.0
+	_fps_actual = 0.0
+	_fps_min = INF
+	_fps_max = 0.0
+	_peor_frame = 0.0
+	if _label.visible:
+		_label.text = "Midiendo..."
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -55,5 +71,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		match event.keycode:
 			KEY_F3:
 				_label.visible = not _label.visible
+				if _label.visible:
+					_label.text = "Midiendo..."
 			KEY_F4:
 				reiniciar()
