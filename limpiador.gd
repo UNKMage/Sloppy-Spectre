@@ -64,6 +64,7 @@ var _navegacion_lista: bool = false
 
 #Espera dos fotogramas antes de pedir las rutas, en caso de latencia al sincronizar
 func _ready() -> void:
+	add_to_group("enemigos")  # la visión de Spooky busca a los enemigos por este grupo
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	_navegacion_lista = true

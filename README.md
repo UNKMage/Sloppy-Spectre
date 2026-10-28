@@ -9,6 +9,7 @@ Estado del proyecto: en desarrollo (prototipo del MVP).
 Cómo se juega
 Muévete levitando libremente por el escenario, sin colisiones de terreno.
 Ensucia el suelo con ectoplasma para aumentar el porcentaje de suciedad.
+Tu vista es un cono que apunta al mouse: fuera de él el escenario queda en sombra y no ves ectoplasma ni Limpiadores.
 Esquiva la linterna del Limpiador: si te alcanza, quedas aturdido 3 segundos.
 Regresa al Portal Espiritual del centro para recargar tu tanque (100 unidades).
 Gana alcanzando el 80 % de suciedad antes de que pasen 120 segundos.
@@ -17,6 +18,7 @@ Controles
 Acción	Teclas
 Moverse	W A S D o flechas direccionales
 Ensuciar	Barra espaciadora
+Apuntar el cono de visión	Mouse
 
 👥 Equipo
 Sofia Fernanda Flores Amador
