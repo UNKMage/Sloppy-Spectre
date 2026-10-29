@@ -1,0 +1,67 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://pantalla_fin.gd" id="1_fin"]
+
+[node name="PantallaFin" type="CanvasLayer"]
+process_mode = 3
+layer = 10
+script = ExtResource("1_fin")
+
+[node name="Fondo" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.8)
+
+[node name="Centro" type="CenterContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Caja" type="VBoxContainer" parent="Centro"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Titulo" type="Label" parent="Centro/Caja"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 72
+text = "GAME OVER"
+horizontal_alignment = 1
+
+[node name="Motivo" type="Label" parent="Centro/Caja"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "Motivo"
+horizontal_alignment = 1
+
+[node name="Datos" type="Label" parent="Centro/Caja"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.75)
+theme_override_font_sizes/font_size = 20
+text = "Datos"
+horizontal_alignment = 1
+
+[node name="Espacio" type="Control" parent="Centro/Caja"]
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+
+[node name="Botones" type="HBoxContainer" parent="Centro/Caja"]
+layout_mode = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="BotonReintentar" type="Button" parent="Centro/Caja/Botones"]
+custom_minimum_size = Vector2(260, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Jugar de nuevo"
+
+[node name="BotonMenu" type="Button" parent="Centro/Caja/Botones"]
+custom_minimum_size = Vector2(260, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Menú principal"
