@@ -20,6 +20,7 @@ config/icon="res://icon.svg"
 VolverAlMenu="*res://volver_al_menu.gd"
 SoundManager="*uid://cepblolyvafqx"
 FpsMonitor="*uid://dmebchg3tdsi7"
+PantallaCarga="*uid://u2by7lbu3oq1"
 
 [display]
 

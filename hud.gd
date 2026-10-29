@@ -27,6 +27,9 @@ var _porcentaje_suciedad: float = 0.0
 ## si antes hubo manchas (es decir, si los Limpiadores borraron todo).
 var _hubo_suciedad: bool = false
 
+## Evita activar la puerta múltiples veces
+var _puerta_activada: bool = false
+
 
 func _ready() -> void:
 	actualizar_etiqueta_tiempo()
@@ -100,7 +103,7 @@ func _on_ghost_pinturas_actualizadas(cantidad_restante: int) -> void:
 	$ProgressBar.value = float(cantidad_restante)
 
 
-## Función para KIBO-17: muestra el porcentaje en enteros sin decimales
+## Función para KIBO-17 y KIBO-29
 func actualizar_porcentaje_suciedad(porcentaje: float, _actuales: int, _totales: int) -> void:
 	_porcentaje_suciedad = porcentaje
 	if porcentaje > 0.0:
@@ -111,10 +114,33 @@ func actualizar_porcentaje_suciedad(porcentaje: float, _actuales: int, _totales:
 	# Reglas de fin de partida (se revisan solo cuando cambia la suciedad, no en cada frame).
 	if partida_terminada:
 		return
+		
+	# KIBO-29: Al alcanzar el 80%, activa la puerta de escape hacia el siguiente nivel
 	if porcentaje >= meta_victoria:
-		_finalizar(true, "¡Ensuciaste la zona antes de que te atraparan!")
+		_activar_escape()
 	elif _hubo_suciedad and porcentaje <= 0.0:
 		_finalizar(false, "Los Limpiadores borraron todo tu ectoplasma.")
+
+
+func _activar_escape() -> void:
+	if _puerta_activada:
+		return
+	_puerta_activada = true
+
+	# Detiene el cronómetro y apaga la alerta de 10s
+	cronometro_activo = false
+	SoundManager.detener_alerta()
+
+	# Busca si el nivel actual tiene la puerta de salida (por grupo o por nombre de nodo)
+	var puerta = get_tree().get_first_node_in_group("puerta_salida")
+	if not puerta and get_tree().current_scene:
+		puerta = get_tree().current_scene.find_child("PuertaSalida", true, false)
+
+	if puerta and puerta.has_method("activar_puerta"):
+		puerta.activar_puerta()
+	else:
+		# Respaldo: si el nivel no tiene puerta (ej. nivel final), termina con pantalla de victoria
+		_finalizar(true, "¡Ensuciaste la zona antes de que te atraparan!")
 
 
 func _on_suelo_suciedad_actualizada(porcentaje: float, celdas_sucias: int, total_celdas: int) -> void:
