@@ -6,6 +6,7 @@
 [ext_resource type="TileSet" uid="uid://dqoiueixjcvs4" path="res://suelo_tileset.tres" id="3_1bvp3"]
 [ext_resource type="PackedScene" path="res://suelo.tscn" id="3_suelo"]
 [ext_resource type="PackedScene" uid="uid://d12ch4vr7k737" path="res://limpiador.tscn" id="5_lquwl"]
+[ext_resource type="PackedScene" uid="uid://v6kh7lnqr68i" path="res://puerta_salida.tscn" id="7_5vw27"]
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_af0o8"]
 vertices = PackedVector2Array(1150, 630, 10, 630, 10, 10, 1150, 10)
@@ -13,6 +14,9 @@ polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2, 3)])
 outlines = Array[PackedVector2Array]([PackedVector2Array(0, 0, 1160, 0, 1160, 640, 0, 640)])
 
 [node name="main" type="Node" unique_id=317017916]
+
+[node name="PuertaSalida" parent="." unique_id=398286724 groups=["puerta_salida"] instance=ExtResource("7_5vw27")]
+siguiente_nivel_ruta = "res://nivel_2.tscn"
 
 [node name="HUD" parent="." unique_id=537810001 instance=ExtResource("1_7mycd")]
 
