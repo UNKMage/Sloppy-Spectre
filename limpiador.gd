@@ -34,6 +34,11 @@ extends CharacterBody2D
 @export_group("Limpieza")
 ## Segundos que tarda en limpiar una mancha al llegar a ella
 @export var tiempo_por_mancha: float = 1.0
+@export var umbral_boost_porcentaje: float = 50.0
+@export var multiplicador_velocidad_boost: float = 1.5
+@export var multiplicador_limpieza_boost: float = 0.6
+
+# -------------------------------------------
 
 var _temporizador_aspirado: float = 0.0
 var _destino_sucia_actual: Variant = null
@@ -85,6 +90,14 @@ func ir_a(destino: Vector2) -> void:
 func _physics_process(delta: float) -> void:
 	if not _navegacion_lista:
 		return
+		
+	var velocidad_actual := velocidad
+	if _suelo and _suelo.celdas_para_100 > 0:
+		var celdas_actuales: int = _suelo._celdas_sucias.size() # <-- Agregado ": int"
+		var porcentaje_actual := (float(celdas_actuales) / float(_suelo.celdas_para_100)) * 100.0
+		if porcentaje_actual >= umbral_boost_porcentaje:
+			velocidad_actual *= multiplicador_velocidad_boost
+
 	if _jugador and _distancia_al_jugador() <= 30.0:
 		_intentar_aturdir()
 
@@ -101,7 +114,7 @@ func _physics_process(delta: float) -> void:
 			_perseguir(delta)
 		Estado.ASPIRANDO:
 			_aspirar(delta)
-	_mover_por_la_ruta()
+	_mover_por_la_ruta(velocidad_actual)
 
 ## Aturde a Spooky (3 s, lo hace su propio script) salvo que ya esté aturdido o inmune.
 ## Es la misma lógica que ya usaba el contacto directo, ahora compartida con la linterna.
@@ -239,6 +252,13 @@ func _aspirar(delta: float) -> void:
 			
 		ir_a(_destino_sucia_actual)
 		_temporizador_aspirado = tiempo_por_mancha
+		
+		var tiempo_efectivo := tiempo_por_mancha
+		if _suelo and _suelo.celdas_para_100 > 0:
+			var porcentaje_actual := (float(_suelo._celdas_sucias.size()) / float(_suelo.celdas_para_100)) * 100.0
+			if porcentaje_actual >= umbral_boost_porcentaje:
+				tiempo_efectivo *= multiplicador_limpieza_boost
+		_temporizador_aspirado = tiempo_efectivo
 
 	# 2. Si ya llegamos a la mancha, contamos el tiempo y la limpiamos
 	if _agente.is_navigation_finished():
@@ -247,12 +267,13 @@ func _aspirar(delta: float) -> void:
 			_suelo.limpiar(_destino_sucia_actual)
 			_destino_sucia_actual = null # Reseteamos para que busque la siguiente en el próximo frames
 
-func _mover_por_la_ruta() -> void:
+func _mover_por_la_ruta(velocidad_actual: float) -> void:
 	if _agente.is_navigation_finished():
 		velocity = Vector2.ZERO
 	else:
 		var siguiente := _agente.get_next_path_position()
-		velocity = global_position.direction_to(siguiente) * velocidad
+		# --- MODIFICADO: Usa velocidad_actual en lugar de la variable fija ---
+		velocity = global_position.direction_to(siguiente) * velocidad_actual
 	move_and_slide()
 
 func _draw() -> void:

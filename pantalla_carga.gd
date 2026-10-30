@@ -44,7 +44,7 @@ func _process(_delta: float) -> void:
 		var fondo = get_node_or_null("ColorRect")
 		if fondo:
 			tween.tween_property(fondo, "modulate:a", 0.0, 0.3)
-		tween.tween_property(self, "modulate:a", 0.0, 0.2)
+		
 		await tween.finished
 		queue_free()
 		
