@@ -4,20 +4,25 @@ extends Area2D
 signal jugador_entro
 signal jugador_salio
 signal recarga_completa
+signal inmunidad_terminada
 
 @export var radio: float = 48.0
 @export var tiempo_recarga: float = 5.0
 @export var capacidad: int = 100
+@export var tiempo_inmunidad: float = 8.0
 
 var _jugador: Area2D = null
 var _acumulado: float = 0.0
 var _tiempo: float = 0.0
-
+var _tiempo_inmunidad_actual: float = 0.0 
+var _inmunidad_activa: bool = false
+var _hud: Node = null
 
 func _ready() -> void:
 	($CollisionShape2D.shape as CircleShape2D).radius = radio
 	area_entered.connect(_on_area_entered)
 	area_exited.connect(_on_area_exited)
+	_hud = get_tree().get_first_node_in_group("hud")
 
 
 func _process(delta: float) -> void:
@@ -27,6 +32,29 @@ func _process(delta: float) -> void:
 	if _jugador == null:
 		SoundManager.detener_recarga()
 		return
+
+	if _inmunidad_activa:
+		_tiempo_inmunidad_actual += delta
+		
+		var tiempo_restante := tiempo_inmunidad - _tiempo_inmunidad_actual
+		
+		if tiempo_restante <= 3.0 and tiempo_restante > 0.0:
+			var segundos_restantes := int(ceil(tiempo_restante))
+			if _hud and _hud.has_method("mostrar_aviso"):
+				_hud.mostrar_aviso("Inmunidad restante: " + str(segundos_restantes))
+		
+		if _tiempo_inmunidad_actual >= tiempo_inmunidad:
+			_inmunidad_activa = false
+			_jugador.set("en_portal", false)
+			if _hud and _hud.has_method("mostrar_aviso"):
+				_hud.mostrar_aviso("¡Inmunidad terminada!")
+				
+				var timer_ocultar := get_tree().create_timer(2.0)
+				timer_ocultar.timeout.connect(func():
+					if _hud and _hud.has_method("ocultar_aviso"):
+						_hud.ocultar_aviso()
+				)
+			print("¡Inmunidad terminada!")
 
 	# Si ya tiene el tanque lleno, no suena y no recarga
 	if _jugador.pinturas_disponibles >= capacidad:
@@ -49,12 +77,19 @@ func _process(delta: float) -> void:
 			SoundManager.detener_recarga()
 			recarga_completa.emit()
 
+#Informa si ya se acabó la inmunidad.
+func tiene_inmunidad_activa() -> bool:
+	return _inmunidad_activa
 
 func _on_area_entered(area: Area2D) -> void:
 	if area.is_in_group("jugador"):
 		_jugador = area
 		_acumulado = 0.0
+		_tiempo_inmunidad_actual = 0.0 
+		_inmunidad_activa = true
 		_jugador.set("en_portal", true)
+		if _hud and _hud.has_method("ocultar_aviso"):
+			_hud.ocultar_aviso()
 		jugador_entro.emit()
 
 
@@ -62,7 +97,10 @@ func _on_area_exited(area: Area2D) -> void:
 	if area == _jugador:
 		SoundManager.detener_recarga()
 		if _jugador:
+			_inmunidad_activa = false
 			_jugador.set("en_portal", false)
+		if _hud and _hud.has_method("ocultar_aviso"):
+			_hud.ocultar_aviso()
 		_jugador = null
 		jugador_salio.emit()
 

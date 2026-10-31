@@ -217,9 +217,16 @@ func _perseguir(delta: float) -> void:
 	_tiempo_decision = intervalo_decision
 	ir_a(_predecir_posicion())
 
+func _esta_protegido_por_portal() -> bool:
+	if not _jugador_en_portal:
+		return false
+	if _portal and _portal.has_method("tiene_inmunidad_activa"):
+		return _portal.tiene_inmunidad_activa()
+	return true
+
 func _distancia_al_jugador() -> float:
 	# Si está en el portal, lo consideramos infinitamente lejos para que lo ignore/pierda
-	if _jugador_en_portal:
+	if _esta_protegido_por_portal():
 		return INF
 		
 	return global_position.distance_to(_jugador.global_position)
@@ -272,7 +279,6 @@ func _mover_por_la_ruta(velocidad_actual: float) -> void:
 		velocity = Vector2.ZERO
 	else:
 		var siguiente := _agente.get_next_path_position()
-		# --- MODIFICADO: Usa velocidad_actual en lugar de la variable fija ---
 		velocity = global_position.direction_to(siguiente) * velocidad_actual
 	move_and_slide()
 

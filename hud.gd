@@ -8,11 +8,11 @@ const PANTALLA_FIN := preload("res://pantalla_fin.tscn")
 @export var meta_victoria: float = 80.0
 
 @onready var barra_pintura: ProgressBar = $ProgressBar
-@onready var label_tiempo: Label = $Label2
-@onready var label_game_over: Label = $LabelGameOver
+@onready var label_tiempo: Label = $Tiempo
 @onready var label_suciedad: Label = get_node_or_null("LabelSuciedad")
 @onready var barra_suciedad: ProgressBar = get_node_or_null("ProgressBarSuciedad")
 @onready var reintentar: Button = get_node_or_null("ButtonReintentar")
+@onready var label_inmunidad_aviso: Label = get_node_or_null("Inmunidad")
 
 var tiempo_restante: float = 120.0
 var cronometro_activo: bool = true
@@ -153,3 +153,13 @@ func _on_button_reintentar_pressed() -> void:
 	get_tree().paused = false
 	# 2. Recarga la escena actual desde cero
 	get_tree().reload_current_scene()
+
+func mostrar_aviso(texto: String) -> void:
+	if label_inmunidad_aviso:
+		label_inmunidad_aviso.text = texto
+		label_inmunidad_aviso.visible = true
+
+
+func ocultar_aviso() -> void:
+	if label_inmunidad_aviso:
+		label_inmunidad_aviso.visible = false
