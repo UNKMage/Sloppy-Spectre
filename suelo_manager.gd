@@ -16,6 +16,9 @@ signal celda_limpiada(posicion_mapa: Vector2i, total_celdas_sucias: int)
 @export var celdas_para_100: int = 120
 
 var _celdas_sucias: Dictionary = {}
+## Manchas reservadas: celda (Vector2i) -> instance_id del Limpiador que va por ella.
+## Evita que varios limpiadores elijan la misma mancha.
+var _reservas: Dictionary = {}
 var _total_celdas_suelo: int = 0
 
 @onready var _capa_suelo: TileMapLayer = $CapaSuelo
@@ -76,6 +79,7 @@ func limpiar(pos_global: Vector2) -> void:
 	var pos_local = capa.to_local(pos_global)
 	var pos_mapa = capa.local_to_map(pos_local)
 	
+	_reservas.erase(pos_mapa)
 	if _celdas_sucias.has(pos_mapa):
 		_celdas_sucias.erase(pos_mapa)
 		capa.erase_cell(pos_mapa)
@@ -120,21 +124,60 @@ func _rellenar_suelo_provisional() -> void:
 			_capa_suelo.set_cell(Vector2i(x, y), source_id, atlas_suelo)
 
 
-func obtener_posicion_sucia_mas_cercana(origen_global: Vector2) -> Variant:
+## Mancha sucia más cercana que NO esté reservada por otro limpiador (no reserva nada).
+## Devuelve null si no hay ninguna disponible.
+func obtener_posicion_sucia_mas_cercana(origen_global: Vector2, solicitante: Node = null) -> Variant:
+	var celda: Variant = _buscar_celda_libre_mas_cercana(origen_global, solicitante)
+	if celda == null:
+		return null
+	return _capa_ectoplasma.to_global(_capa_ectoplasma.map_to_local(celda))
+
+
+## Igual que la anterior, pero además RESERVA la mancha para el solicitante.
+## Libera antes cualquier reserva previa que tuviera.
+func reservar_mancha_mas_cercana(origen_global: Vector2, solicitante: Node) -> Variant:
+	liberar_reservas(solicitante)
+	var celda: Variant = _buscar_celda_libre_mas_cercana(origen_global, solicitante)
+	if celda == null:
+		return null
+	_reservas[celda] = solicitante.get_instance_id()
+	return _capa_ectoplasma.to_global(_capa_ectoplasma.map_to_local(celda))
+
+
+## ¿Queda alguna mancha que este limpiador pueda tomar (sin reservar, o ya suya)?
+## Las reservas siempre son de celdas sucias (limpiar() las borra), por eso basta con contar.
+func hay_mancha_disponible(solicitante: Node = null) -> bool:
+	var reservadas_por_otros := 0
+	var id := solicitante.get_instance_id() if solicitante else 0
+	for celda in _reservas:
+		if _reservas[celda] != id:
+			reservadas_por_otros += 1
+	return _celdas_sucias.size() > reservadas_por_otros
+
+
+## Suelta las manchas reservadas por este limpiador (cambió de estado, lo aturdieron, se destruyó...).
+func liberar_reservas(solicitante: Node) -> void:
+	var id := solicitante.get_instance_id()
+	for celda in _reservas.keys():
+		if _reservas[celda] == id:
+			_reservas.erase(celda)
+
+
+func _buscar_celda_libre_mas_cercana(origen_global: Vector2, solicitante: Node) -> Variant:
 	if _celdas_sucias.is_empty():
 		return null
-		
-	var capa = $CapaEctoplasma
-	var pos_mapa_origen = capa.local_to_map(capa.to_local(origen_global))
-	
-	var celda_mas_cercana: Vector2i
-	var distancia_minima = INF
-	
-	for celda in _celdas_sucias.keys():
-		var dist = Vector2(pos_mapa_origen).distance_squared_to(Vector2(celda))
+
+	var id := solicitante.get_instance_id() if solicitante else 0
+	var origen := Vector2(_capa_ectoplasma.local_to_map(_capa_ectoplasma.to_local(origen_global)))
+
+	var mejor: Variant = null
+	var distancia_minima := INF
+	for celda: Vector2i in _celdas_sucias.keys():
+		# Saltar las que otro limpiador ya está atendiendo
+		if _reservas.has(celda) and _reservas[celda] != id:
+			continue
+		var dist := origen.distance_squared_to(Vector2(celda))
 		if dist < distancia_minima:
 			distancia_minima = dist
-			celda_mas_cercana = celda
-			
-	var pos_local = capa.map_to_local(celda_mas_cercana)
-	return capa.to_global(pos_local)
+			mejor = celda
+	return mejor

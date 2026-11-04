@@ -78,6 +78,11 @@ func _ready() -> void:
 		_portal.jugador_entro.connect(_on_jugador_entro_portal)
 		_portal.jugador_salio.connect(_on_jugador_salio_portal)
 
+func _exit_tree() -> void:
+	if _suelo:
+		_suelo.liberar_reservas(self)
+
+
 func _on_jugador_entro_portal(param = null) -> void:
 	_jugador_en_portal = true
 
@@ -168,7 +173,9 @@ func cambiar_estado(nuevo: Estado) -> void:
 	estado = nuevo
 	_tiempo_decision = 0.0
 	_tiempo_sin_ver = 0.0
-	_destino_sucia_actual = null # <-- LÍNEA NUEVA
+	if _suelo:
+		_suelo.liberar_reservas(self) # suelta la mancha para que otro limpiador pueda tomarla
+	_destino_sucia_actual = null
 	print("Limpiador -> ", Estado.keys()[estado])
 	queue_redraw()
 
@@ -180,7 +187,7 @@ func _patrullar() -> void:
 		return
 
 	# Si hay suciedad, pasa a limpiar por iniciativa propia
-	if _suelo and _suelo.obtener_posicion_sucia_mas_cercana(global_position) != null:
+	if _suelo and _suelo.hay_mancha_disponible(self):
 		cambiar_estado(Estado.ASPIRANDO)
 		return
 
@@ -199,7 +206,7 @@ func _perseguir(delta: float) -> void:
 		_tiempo_sin_ver += delta
 		if _tiempo_sin_ver >= memoria:
 			# Lo perdió y agotó la memoria. Decide si limpia o patrulla.
-			if _suelo and _suelo.obtener_posicion_sucia_mas_cercana(global_position) != null:
+			if _suelo and _suelo.hay_mancha_disponible(self):
 				cambiar_estado(Estado.ASPIRANDO)
 			else:
 				cambiar_estado(Estado.PATRULLANDO)
@@ -250,7 +257,7 @@ func _aspirar(delta: float) -> void:
 
 	# 1. Buscar una mancha si no tenemos una asignada
 	if _destino_sucia_actual == null:
-		_destino_sucia_actual = _suelo.obtener_posicion_sucia_mas_cercana(global_position)
+		_destino_sucia_actual = _suelo.reservar_mancha_mas_cercana(global_position, self)
 		
 		# Si ya no quedan manchas, volvemos a patrullar
 		if _destino_sucia_actual == null:
