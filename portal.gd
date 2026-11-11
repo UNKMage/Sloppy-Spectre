@@ -105,8 +105,71 @@ func _on_area_exited(area: Area2D) -> void:
 		jugador_salio.emit()
 
 
+## Arte del Portal Espiritual (pixel art dibujado en código, para combinar con los fondos):
+## aro de piedra con runas que brillan, remolino de energía violeta/cian y motas que flotan.
+const PIXEL := 4.0
+const PALETA_ENERGIA: Array[Color] = [
+	Color("1b1040"), Color("2d1b6b"), Color("4b2fa0"), Color("7a5ce6"), Color("8feaff"),
+]
+const PIEDRAS: Array[Color] = [Color("48506a"), Color("5b6379"), Color("3d445c"), Color("6a728a")]
+const CONTORNO := Color("14142b")
+
+
+func _hash(x: int, y: int) -> float:
+	var n := (x * 374761393 + y * 668265263) & 0x7fffffff
+	n = ((n ^ (n >> 13)) * 1274126177) & 0x7fffffff
+	return float(n & 0xffff) / 65535.0
+
+
 func _draw() -> void:
-	var pulso := 1.0 + sin(_tiempo * 3.0) * 0.05
-	draw_circle(Vector2.ZERO, radio * pulso, Color(0.35, 0.2, 0.8, 0.35))
-	draw_circle(Vector2.ZERO, radio * 0.6 * pulso, Color(0.2, 0.4, 1.0, 0.5))
-	draw_arc(Vector2.ZERO, radio * pulso, 0.0, TAU, 32, Color(0.6, 0.5, 1.0), 3.0)
+	var pulso := 0.5 + 0.5 * sin(_tiempo * 2.2)
+	# Resplandor suave alrededor.
+	for i in 5:
+		draw_circle(Vector2.ZERO, radio * (1.45 - i * 0.12), Color(0.45, 0.35, 0.95, 0.04 + i * 0.01 + pulso * 0.012))
+
+	var celdas := int(ceil(radio * 1.15 / PIXEL))
+	for gy in range(-celdas, celdas):
+		for gx in range(-celdas, celdas):
+			var centro := Vector2((gx + 0.5) * PIXEL, (gy + 0.5) * PIXEL)
+			var r := centro.length() / radio
+			var color: Color
+			if r > 1.1:
+				continue
+			elif r > 1.0:
+				color = CONTORNO
+			elif r > 0.84:
+				# aro de piedra con variación de bloques
+				color = PIEDRAS[int(_hash(gx, gy) * 4.0) % 4]
+				if centro.y < -centro.x * 0.3:
+					color = color.lightened(0.1)  # luz desde arriba
+				if r > 0.96 or r < 0.87:
+					color = color.darkened(0.2)
+			elif r > 0.8:
+				color = CONTORNO
+			else:
+				# remolino de energía
+				var ang := atan2(centro.y, centro.x)
+				var giro := sin(ang * 3.0 + r * 7.0 - _tiempo * 1.8) * 0.5 + 0.5
+				var v := giro * 0.55 + (1.0 - r / 0.8) * 0.55 + pulso * 0.1
+				v += (_hash(gx + int(_tiempo * 3.0), gy) - 0.5) * 0.08
+				var paso := clampi(int(v * 4.2), 0, 4)
+				color = PALETA_ENERGIA[paso]
+			draw_rect(Rect2(centro - Vector2(PIXEL, PIXEL) * 0.5, Vector2(PIXEL, PIXEL)), color)
+
+	# Runas que brillan una tras otra alrededor del aro.
+	for k in 8:
+		var a := k * TAU / 8.0 + 0.2
+		var brillo := 0.5 + 0.5 * sin(_tiempo * 2.0 - k * 0.8)
+		var p := Vector2.from_angle(a) * radio * 0.92
+		p = (p / PIXEL).round() * PIXEL
+		draw_rect(Rect2(p - Vector2(PIXEL, PIXEL) * 0.5, Vector2(PIXEL, PIXEL)), Color(0.56, 0.92, 1.0, 0.35 + brillo * 0.65))
+		var q := Vector2.from_angle(a).rotated(PI / 2.0) * PIXEL
+		draw_rect(Rect2(p + q - Vector2(PIXEL, PIXEL) * 0.5, Vector2(PIXEL, PIXEL)), Color(0.56, 0.92, 1.0, (0.35 + brillo * 0.65) * 0.6))
+
+	# Motas de espíritu que suben desde el portal.
+	for k in 9:
+		var fase := fmod(_tiempo * 0.35 + k / 9.0, 1.0)
+		var x := sin(k * 2.3 + _tiempo * 0.9) * radio * 0.7
+		var y := radio * 0.5 - fase * radio * 1.7
+		var p2 := (Vector2(x, y) / PIXEL).round() * PIXEL
+		draw_rect(Rect2(p2 - Vector2(PIXEL, PIXEL) * 0.5, Vector2(PIXEL, PIXEL)), Color(0.75, 0.95, 1.0, sin(fase * PI) * 0.9))
