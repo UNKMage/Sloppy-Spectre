@@ -35,6 +35,7 @@ var _puerta_activada: bool = false
 
 func _ready() -> void:
 	actualizar_etiqueta_tiempo()
+	ocultar_aviso()
 	if reintentar and not reintentar.pressed.is_connected(_on_button_reintentar_pressed):
 		reintentar.pressed.connect(_on_button_reintentar_pressed)
 	_conectar_suelo()
