@@ -2,21 +2,31 @@
 
 [ext_resource type="Script" uid="uid://clhx5e1aeeo6d" path="res://nivel_con_paredes.gd" id="1_nivel"]
 [ext_resource type="PackedScene" path="res://suelo.tscn" id="2_suelo"]
+[ext_resource type="Texture2D" uid="uid://dgrqtt6x36inp" path="res://fondonivel2.jpg" id="2_ug47r"]
 [ext_resource type="PackedScene" uid="uid://cvfwxh4d3oy7h" path="res://portal.tscn" id="3_portal"]
 [ext_resource type="PackedScene" uid="uid://d12ch4vr7k737" path="res://limpiador.tscn" id="4_limpiador"]
 [ext_resource type="PackedScene" uid="uid://ck0uog3mxeca3" path="res://area_2d.tscn" id="5_ghost"]
 [ext_resource type="PackedScene" uid="uid://xl7r0nt3sod1" path="res://hud.tscn" id="6_hud"]
 [ext_resource type="PackedScene" uid="uid://cabw7hnj860tr" path="res://pared.tscn" id="7_pared"]
 [ext_resource type="PackedScene" uid="uid://v6kh7lnqr68i" path="res://puerta_salida.tscn" id="8_ug47r"]
-[ext_resource type="Script" uid="uid://cs2p3pqhf86uy" path="res://puerta_salida.gd" id="9_pnk7n"]
 
 [node name="Nivel2" type="Node2D" unique_id=1837247492]
 script = ExtResource("1_nivel")
+
+[node name="Fondo" type="Sprite2D" parent="." unique_id=1341609456]
+modulate = Color(0.36862746, 0.36862746, 0.36862746, 1)
+z_index = -2
+scale = Vector2(0.422, 0.422)
+texture = ExtResource("2_ug47r")
+centered = false
 
 [node name="navegacion" type="NavigationRegion2D" parent="." unique_id=1014641922]
 visible = false
 
 [node name="Suelo" parent="." unique_id=934833224 instance=ExtResource("2_suelo")]
+
+[node name="CapaSuelo" parent="Suelo" index="0"]
+self_modulate = Color(1, 1, 1, 0.47058824)
 
 [node name="Paredes" type="Node2D" parent="." unique_id=1709198403]
 
@@ -63,8 +73,9 @@ position = Vector2(656, 330)
 [node name="HUD" parent="." unique_id=320015532 instance=ExtResource("6_hud")]
 
 [node name="PuertaSalida" parent="." unique_id=398286724 groups=["puerta_salida"] instance=ExtResource("8_ug47r")]
-script = ExtResource("9_pnk7n")
 siguiente_nivel_ruta = "res://nivel_3.tscn"
 
 [connection signal="suciedad_actualizada" from="Suelo" to="HUD" method="actualizar_porcentaje_suciedad"]
 [connection signal="pinturas_actualizadas" from="ghost" to="HUD" method="_on_ghost_pinturas_actualizadas"]
+
+[editable path="Suelo"]

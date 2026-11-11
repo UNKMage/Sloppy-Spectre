@@ -35,4 +35,5 @@ frame_progress = 0.8466066
 shape = SubResource("CapsuleShape2D_77xrk")
 
 [node name="Vision" type="Node2D" parent="." unique_id=1330132571]
+z_index = 3
 script = ExtResource("3_vision")
