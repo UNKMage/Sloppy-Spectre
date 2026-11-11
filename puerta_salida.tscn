@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://v6kh7lnqr68i"]
+
+[ext_resource type="Texture2D" uid="uid://c4tj1g1egoceo" path="res://door_transparent.png" id="1_d62ca"]
+[ext_resource type="Script" uid="uid://cs2p3pqhf86uy" path="res://puerta_salida.gd" id="2_2he5e"]
+
+[node name="PuertaSalida" type="Area2D" unique_id=398286724]
+script = ExtResource("2_2he5e")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1034777110]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1591550702]
+position = Vector2(578, 90)
+texture = ExtResource("1_d62ca")
+
+[node name="ENTRA" type="Label" parent="." unique_id=314521992]
+offset_left = 527.0
+offset_top = 141.0
+offset_right = 630.0
+offset_bottom = 167.0
+text = "ENTRA"
+horizontal_alignment = 1

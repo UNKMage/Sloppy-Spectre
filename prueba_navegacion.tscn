@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://c2dmtdtlkr1v"]
+
+[ext_resource type="PackedScene" uid="uid://d12ch4vr7k737" path="res://limpiador.tscn" id="1_r2gk3"]
+[ext_resource type="PackedScene" uid="uid://cabw7hnj860tr" path="res://pared.tscn" id="2_y3awn"]
+
+[sub_resource type="NavigationPolygon" id="NavigationPolygon_47y77"]
+vertices = PackedVector2Array(780, 534, 1136, 632, 16, 632, 708, 534, 1136, 16, 780, 202, 16, 16, 708, 202)
+polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2, 3), PackedInt32Array(4, 1, 0, 5), PackedInt32Array(6, 4, 5, 7), PackedInt32Array(2, 6, 7, 3)])
+outlines = Array[PackedVector2Array]([PackedVector2Array(0, 0, 1152, 0, 1152, 648, 0, 648)])
+parsed_geometry_type = 1
+parsed_collision_mask = 4294967044
+agent_radius = 16.0
+
+[node name="PruebaNavegacion" type="Node2D" unique_id=761244136]
+
+[node name="NavigationRegion2D" type="NavigationRegion2D" parent="." unique_id=935218039]
+navigation_polygon = SubResource("NavigationPolygon_47y77")
+
+[node name="Pared" parent="NavigationRegion2D" unique_id=1946771330 instance=ExtResource("2_y3awn")]
+position = Vector2(744, 368)
+
+[node name="Limpiador" parent="." unique_id=1166426898 instance=ExtResource("1_r2gk3")]
+position = Vector2(616, 424)
+collision_layer = 6

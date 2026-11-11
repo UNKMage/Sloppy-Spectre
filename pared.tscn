@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://cabw7hnj860tr"]
+
+[ext_resource type="Script" path="res://pared.gd" id="1_pared"]
+
+[node name="Pared" type="StaticBody2D" unique_id=1946771330]
+collision_layer = 4
+script = ExtResource("1_pared")
