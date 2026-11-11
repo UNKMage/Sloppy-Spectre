@@ -59,12 +59,30 @@ func _ready() -> void:
 	# Esperamos un fotograma para que el nivel esté completo.
 	await get_tree().physics_frame
 	_repartir_materiales(get_tree().current_scene)
+	_crear_ectoplasma_visual()
 	for enemigo in get_tree().get_nodes_in_group("enemigos"):
 		(enemigo as CanvasItem).material = _material_ocultar
 		var estela := EstelaPolvo.new()
 		estela.objetivo = enemigo as Node2D
 		estela.z_index = 2
 		get_tree().current_scene.add_child(estela)
+
+
+## Reemplaza el dibujo cuadrado de CapaEctoplasma por manchas orgánicas con salpicaduras.
+## La capa sigue existiendo (y llevando la cuenta), solo deja de dibujarse.
+func _crear_ectoplasma_visual() -> void:
+	var suelo := get_tree().get_first_node_in_group("suelo")
+	var capa := suelo.get_node_or_null("CapaEctoplasma") as TileMapLayer if suelo else null
+	if capa == null:
+		return
+	var visual := EctoplasmaVisual.new()
+	visual.name = "EctoplasmaVisual"
+	visual.material = _material_ecto
+	visual.modulate = capa.modulate
+	visual.z_index = capa.z_index
+	suelo.add_child(visual)
+	visual.iniciar(suelo, capa)
+	capa.visible = false
 
 
 func _crear_material(brillo_fuera: float, opacidad_fuera: float) -> ShaderMaterial:
