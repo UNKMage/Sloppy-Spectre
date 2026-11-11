@@ -29,6 +29,10 @@ const SHADER := preload("res://vision_cono.gdshader")
 ## Ancho del degradado del borde, en píxeles.
 @export var suavizado_borde: float = 70.0
 
+@export_group("Ectoplasma")
+## Cuánto se ve el ectoplasma a través de la sombra (0 = invisible, 1 = como en el cono).
+@export_range(0.0, 1.0, 0.01) var brillo_ectoplasma_sombra: float = 0.3
+
 @export_group("Nube")
 ## Cuánto deforma el ruido el borde del cono, en píxeles.
 @export var irregularidad_px: float = 35.0
@@ -39,6 +43,7 @@ const SHADER := preload("res://vision_cono.gdshader")
 
 var _material_suelo: ShaderMaterial
 var _material_ocultar: ShaderMaterial
+var _material_ecto: ShaderMaterial
 var _distancias := PackedFloat32Array()
 var _angulo: float = 0.0
 var _angulo_calculado: float = INF
@@ -50,11 +55,16 @@ func _ready() -> void:
 	_distancias.fill(alcance)
 	_material_suelo = _crear_material(brillo_sombra, 1.0)
 	_material_ocultar = _crear_material(1.0, 0.0)
+	_material_ecto = _crear_material(1.0, brillo_ectoplasma_sombra)
 	# Esperamos un fotograma para que el nivel esté completo.
 	await get_tree().physics_frame
 	_repartir_materiales(get_tree().current_scene)
 	for enemigo in get_tree().get_nodes_in_group("enemigos"):
 		(enemigo as CanvasItem).material = _material_ocultar
+		var estela := EstelaPolvo.new()
+		estela.objetivo = enemigo as Node2D
+		estela.z_index = 2
+		get_tree().current_scene.add_child(estela)
 
 
 func _crear_material(brillo_fuera: float, opacidad_fuera: float) -> ShaderMaterial:
@@ -79,7 +89,7 @@ func _repartir_materiales(nodo: Node) -> void:
 	if nodo is TileMapLayer:
 		var capa := nodo as TileMapLayer
 		capa.use_parent_material = false
-		capa.material = _material_ocultar if capa.name == &"CapaEctoplasma" else _material_suelo
+		capa.material = _material_ecto if capa.name == &"CapaEctoplasma" else _material_suelo
 	for hijo in nodo.get_children():
 		_repartir_materiales(hijo)
 
@@ -102,7 +112,7 @@ func _physics_process(_delta: float) -> void:
 		var choque := espacio.intersect_ray(consulta)
 		_distancias[i] = global_position.distance_to(choque.position) if not choque.is_empty() else alcance
 
-	for m in [_material_suelo, _material_ocultar]:
+	for m in [_material_suelo, _material_ocultar, _material_ecto]:
 		m.set_shader_parameter("origen", global_position)
 		m.set_shader_parameter("angulo_centro", _angulo)
 		m.set_shader_parameter("distancias", _distancias)

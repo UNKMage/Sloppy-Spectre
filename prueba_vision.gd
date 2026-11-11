@@ -55,7 +55,7 @@ func _correr() -> void:
 	var m_suelo := _material(n3.get_node("Suelo/CapaSuelo"))
 	var m_ecto := _material(n3.get_node("Suelo/CapaEctoplasma"))
 	_comprobar(m_suelo != null and m_suelo.get_shader_parameter("opacidad_fuera") == 1.0, "CapaSuelo con material de sombra")
-	_comprobar(m_ecto != null and m_ecto.get_shader_parameter("opacidad_fuera") == 0.0, "CapaEctoplasma con material de ocultar")
+	_comprobar(m_ecto != null and m_ecto.get_shader_parameter("opacidad_fuera") > 0.0 and m_ecto.get_shader_parameter("opacidad_fuera") < 1.0, "CapaEctoplasma con material tenue en sombra")
 
 	var enemigos := get_nodes_in_group("enemigos")
 	var todos_con_material := true
@@ -63,6 +63,12 @@ func _correr() -> void:
 		if (e as CanvasItem).material == null:
 			todos_con_material = false
 	_comprobar(enemigos.size() == 3 and todos_con_material, "3 enemigos con material (hay %d)" % enemigos.size())
+
+	var estelas := 0
+	for hijo in n3.get_children():
+		if hijo is EstelaPolvo and (hijo as EstelaPolvo).material == null:
+			estelas += 1
+	_comprobar(estelas == 3, "3 estelas de polvo sin material (hay %d)" % estelas)
 
 	var sin_material := true
 	for p in get_nodes_in_group("paredes"):
