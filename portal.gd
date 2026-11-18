@@ -47,7 +47,7 @@ func _process(delta: float) -> void:
 			_inmunidad_activa = false
 			_jugador.set("en_portal", false)
 			if _hud and _hud.has_method("mostrar_aviso"):
-				_hud.mostrar_aviso("¡Inmunidad terminada!")
+				_hud.mostrar_aviso("Inmunidad terminada")
 				
 				var timer_ocultar := get_tree().create_timer(2.0)
 				timer_ocultar.timeout.connect(func():

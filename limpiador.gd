@@ -38,6 +38,7 @@ extends CharacterBody2D
 @export var multiplicador_velocidad_boost: float = 1.5
 @export var multiplicador_limpieza_boost: float = 0.6
 
+
 # -------------------------------------------
 
 var _temporizador_aspirado: float = 0.0
@@ -66,7 +67,7 @@ var _navegacion_lista: bool = false
 
 @onready var _agente: NavigationAgent2D = $NavigationAgent2D
 @onready var _jugador := get_tree().get_first_node_in_group("jugador") as Node2D
-
+@onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 #Espera dos fotogramas antes de pedir las rutas, en caso de latencia al sincronizar
 func _ready() -> void:
 	add_to_group("enemigos")  # la visión de Spooky busca a los enemigos por este grupo
@@ -287,6 +288,15 @@ func _mover_por_la_ruta(velocidad_actual: float) -> void:
 	else:
 		var siguiente := _agente.get_next_path_position()
 		velocity = global_position.direction_to(siguiente) * velocidad_actual
+	if velocity.length() > 5.0:
+		animated_sprite.play("default") # Reproduce la animación al moverse
+		
+		# Opcional: Voltea el sprite horizontalmente según hacia dónde camina
+		if velocity.x != 0:
+			animated_sprite.flip_h = velocity.x < 0
+	else:
+		animated_sprite.stop()    # Detiene la reproducción automática
+		animated_sprite.frame = 0 # O animated_sprite.frame = 0
 	move_and_slide()
 
 func _draw() -> void:

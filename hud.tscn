@@ -32,12 +32,27 @@ offset_bottom = 78.0
 theme_override_fonts/font = ExtResource("4_640wx")
 text = "Suciedad"
 
-[node name="Inmunidad" type="Label" parent="." unique_id=1001368656]
-visible = false
-offset_left = 480.0
-offset_top = 219.0
-offset_right = 701.0
-offset_bottom = 245.0
+[node name="Inmunidad" type="ColorRect" parent="." unique_id=1429033698]
+offset_right = 40.0
+offset_bottom = 40.0
+size_flags_horizontal = 4
+size_flags_vertical = 4
+color = Color(0, 1, 1, 1)
+
+[node name="Label" type="Label" parent="Inmunidad" unique_id=1001368656]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 1.0
+offset_top = -4.0
+offset_right = 287.0
+offset_bottom = 22.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("4_640wx")
 text = "Inmunidad restante: Tiempo"
 
 [node name="BarraManchas" type="TextureProgressBar" parent="." unique_id=377053614]

@@ -12,14 +12,17 @@ const PANTALLA_FIN := preload("res://pantalla_fin.tscn")
 @onready var barra_suciedad: PixelBar = get_node_or_null("BarraSuciedad")
 @onready var label_suciedad: Label = get_node_or_null("LabelSuciedad")
 @onready var reintentar: Button = get_node_or_null("ButtonReintentar")
-@onready var label_inmunidad_aviso: Label = get_node_or_null("Inmunidad")
+@onready var label_inmunidad_aviso: ColorRect = get_node_or_null("Inmunidad")
+@onready var _texto_inmunidad: Label = get_node_or_null("Inmunidad/Label")
 @onready var label_numero_pintura: Label = $BarraManchas/ContadorMancha
 @onready var label_numero_suciedad: Label = $BarraSuciedad/ContadorSuciedad
 
+var _tiempo_aviso_restante: float = 0.0
 var tiempo_restante: float = 120.0
 var cronometro_activo: bool = true
 ## true cuando ya se ganó o se perdió (evita terminar dos veces el mismo frame).
 var partida_terminada: bool = false
+var _tiempo_parpadeo: float = 0.0
 
 ## Evita reproducir la alerta repetidamente dentro del mismo segundo
 var _ultimo_segundo_alerta: int = -1
@@ -50,6 +53,17 @@ func _conectar_suelo() -> void:
 
 
 func _process(delta: float) -> void:
+	if label_inmunidad_aviso and label_inmunidad_aviso.visible:
+		# Parpadeo suave
+		_tiempo_parpadeo += delta * 6.0
+		var alpha := (sin(_tiempo_parpadeo) + 1.0) * 0.35 + 0.3
+		label_inmunidad_aviso.modulate.a = alpha
+		
+		# Restamos el tiempo en cada frame y ocultamos si llega a 0
+		_tiempo_aviso_restante -= delta
+		if _tiempo_aviso_restante <= 0.0:
+			ocultar_aviso()
+		
 	if not cronometro_activo:
 		return
 	tiempo_restante -= delta
@@ -164,11 +178,44 @@ func _on_button_reintentar_pressed() -> void:
 	get_tree().reload_current_scene()
 
 func mostrar_aviso(texto: String) -> void:
+	if _texto_inmunidad:
+		_texto_inmunidad.text = texto
+		
+		# Hacemos que el Label cubra todo el tamaño del ColorRect padre
+		_texto_inmunidad.set_anchors_preset(Control.PRESET_FULL_RECT)
+		
+		# Limpiamos los offsets (márgenes) para que no se desplace hacia ninguna esquina
+		_texto_inmunidad.offset_left = 0
+		_texto_inmunidad.offset_top = 0
+		_texto_inmunidad.offset_right = 0
+		_texto_inmunidad.offset_bottom = 0
+		
+		# Centramos el texto horizontal y verticalmente
+		_texto_inmunidad.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_texto_inmunidad.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		
 	if label_inmunidad_aviso:
-		label_inmunidad_aviso.text = texto
+		# Asignamos color de fondo oscuro y semitransparente
+		label_inmunidad_aviso.color = Color(0.1, 0.05, 0.25, 0.85)
+		
+		# Definimos el tamaño: Más largo horizontalmente (620) y más delgado de alto (48)
+		label_inmunidad_aviso.size = Vector2(620, 48)
+		
+		# Calculamos el centro de la pantalla
+		var tamaño_pantalla := get_viewport().get_visible_rect().size
+		var centro := (tamaño_pantalla - label_inmunidad_aviso.size) / 2
+		
+		# Posicionamos el aviso más arriba (subimos restando 140 píxeles en Y)
+		label_inmunidad_aviso.position = Vector2(centro.x, centro.y - 140.0)
+		
+		# Lo hacemos visible, reiniciamos el parpadeo y configuramos el temporizador a 3 segundos
 		label_inmunidad_aviso.visible = true
+		_tiempo_parpadeo = 0.0
+		_tiempo_aviso_restante = 3.0
 
 
 func ocultar_aviso() -> void:
 	if label_inmunidad_aviso:
 		label_inmunidad_aviso.visible = false
+		label_inmunidad_aviso.modulate.a = 1.0 # Restaura la opacidad por defecto
+# [FIN DEL CAMBIO]
