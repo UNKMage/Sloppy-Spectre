@@ -346,15 +346,54 @@ func _actualizar_cono_visible() -> void:
 	queue_redraw()
 
 
-## Dibuja el cono de luz (provisional, hasta que haya arte).
-## Se dibuja como abanico de triángulos: no falla aunque la luz quede muy corta contra una pared.
+## Haz de la linterna en pixel art: bandas de luz cálida que se apagan con la distancia, motas de
+## polvo flotando dentro y una linterna en la mano. Cada banda es el mismo cono achicado hacia el
+## Limpiador, así toda la luz se sigue cortando contra las paredes.
+const BANDAS: Array = [
+	[1.0, Color(1.0, 0.86, 0.45, 0.07)],
+	[0.78, Color(1.0, 0.88, 0.5, 0.07)],
+	[0.56, Color(1.0, 0.9, 0.55, 0.08)],
+	[0.34, Color(1.0, 0.93, 0.62, 0.09)],
+	[0.16, Color(1.0, 0.97, 0.78, 0.12)],
+]
+var _luz_t: float = 0.0
+
+
+func _process(delta: float) -> void:
+	_luz_t += delta
+	if linterna_encendida:
+		queue_redraw()  # el haz parpadea y el polvo se mueve
+
+
 func _dibujar_cono() -> void:
 	if _puntos_cono.size() < 3:
 		return
-	var relleno := Color(1.0, 0.95, 0.5, 0.22)
-	var colores := PackedColorArray([relleno, relleno, relleno])
-	for i in range(1, _puntos_cono.size() - 1):
-		draw_primitive(PackedVector2Array([_puntos_cono[0], _puntos_cono[i], _puntos_cono[i + 1]]), colores, PackedVector2Array())
-	var borde := PackedVector2Array(_puntos_cono)
-	borde.append(Vector2.ZERO)
-	draw_polyline(borde, Color(1.0, 0.95, 0.5, 0.6), 1.5)
+	# Parpadeo leve, como una linterna vieja.
+	var parpadeo := 1.0 + sin(_luz_t * 23.0) * 0.015 + sin(_luz_t * 7.3) * 0.02
+	for banda in BANDAS:
+		var escala: float = banda[0] * parpadeo
+		var color: Color = banda[1]
+		var colores := PackedColorArray([color, color, color])
+		var puntos := PackedVector2Array()
+		for p in _puntos_cono:
+			puntos.append(((p * minf(escala, 1.0) / 4.0).round() * 4.0))
+		for i in range(1, puntos.size() - 1):
+			draw_primitive(PackedVector2Array([puntos[0], puntos[i], puntos[i + 1]]), colores, PackedVector2Array())
+
+	# Polvo que flota dentro del haz.
+	for k in 10:
+		var f := fmod(_luz_t * 0.22 + k / 10.0, 1.0)
+		var idx := 1 + int(fmod(k * 0.618 + 0.13, 1.0) * RAYOS_CONO)
+		var limite := _puntos_cono[idx]
+		var p := limite * f * 0.92
+		p += Vector2(sin(_luz_t * 1.7 + k), cos(_luz_t * 1.3 + k * 2.0)) * 3.0
+		p = (p / 2.0).round() * 2.0
+		draw_rect(Rect2(p, Vector2(2, 2)), Color(1.0, 0.97, 0.8, sin(f * PI) * 0.75))
+
+	# La linterna en la "mano" del Limpiador.
+	draw_set_transform(Vector2.ZERO, direccion_mirada.angle(), Vector2.ONE)
+	draw_rect(Rect2(10, -4, 10, 8), Color("2b2f3b"))
+	draw_rect(Rect2(10, -4, 10, 2), Color("4a5063"))
+	draw_rect(Rect2(20, -6, 4, 12), Color("14142b"))
+	draw_rect(Rect2(21, -5, 3, 10), Color(1.0, 0.96, 0.7))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)

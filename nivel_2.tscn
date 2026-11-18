@@ -9,7 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://xl7r0nt3sod1" path="res://hud.tscn" id="6_hud"]
 [ext_resource type="PackedScene" uid="uid://cabw7hnj860tr" path="res://pared.tscn" id="7_pared"]
 [ext_resource type="PackedScene" uid="uid://v6kh7lnqr68i" path="res://puerta_salida.tscn" id="8_ug47r"]
-[ext_resource type="Script" path="res://gestor_boosts.gd" id="99_boosts"]
+[ext_resource type="Script" uid="uid://c22gjnvylid8q" path="res://gestor_boosts.gd" id="99_boosts"]
 
 [node name="Nivel2" type="Node2D" unique_id=1837247492]
 script = ExtResource("1_nivel")
@@ -31,31 +31,31 @@ self_modulate = Color(1, 1, 1, 0.47058824)
 
 [node name="Paredes" type="Node2D" parent="." unique_id=1709198403]
 
-[node name="Pared1" parent="Paredes" instance=ExtResource("7_pared")]
+[node name="Pared1" parent="Paredes" unique_id=2138353459 instance=ExtResource("7_pared")]
 position = Vector2(265, 124)
 tamano = Vector2(38, 248)
 
-[node name="Pared2" parent="Paredes" instance=ExtResource("7_pared")]
+[node name="Pared2" parent="Paredes" unique_id=2010383100 instance=ExtResource("7_pared")]
 position = Vector2(265, 482)
 tamano = Vector2(38, 316)
 
-[node name="Pared3" parent="Paredes" instance=ExtResource("7_pared")]
+[node name="Pared3" parent="Paredes" unique_id=1585125980 instance=ExtResource("7_pared")]
 position = Vector2(888, 182)
 tamano = Vector2(38, 364)
 
-[node name="Pared4" parent="Paredes" instance=ExtResource("7_pared")]
+[node name="Pared4" parent="Paredes" unique_id=577132967 instance=ExtResource("7_pared")]
 position = Vector2(888, 543)
 tamano = Vector2(38, 200)
 
-[node name="Pared5" parent="Paredes" instance=ExtResource("7_pared")]
+[node name="Pared5" parent="Paredes" unique_id=415147041 instance=ExtResource("7_pared")]
 position = Vector2(757, 581)
 tamano = Vector2(43, 124)
 
-[node name="Pared6" parent="Paredes" instance=ExtResource("7_pared")]
+[node name="Pared6" parent="Paredes" unique_id=308198796 instance=ExtResource("7_pared")]
 position = Vector2(399, 612)
 tamano = Vector2(128, 62)
 
-[node name="Pared7" parent="Paredes" instance=ExtResource("7_pared")]
+[node name="Pared7" parent="Paredes" unique_id=1552147481 instance=ExtResource("7_pared")]
 position = Vector2(74, 334)
 tamano = Vector2(112, 220)
 
@@ -80,7 +80,7 @@ position = Vector2(656, 330)
 [node name="PuertaSalida" parent="." unique_id=398286724 groups=["puerta_salida"] instance=ExtResource("8_ug47r")]
 siguiente_nivel_ruta = "res://nivel_3.tscn"
 
-[node name="GestorBoosts" type="Node" parent="."]
+[node name="GestorBoosts" type="Node" parent="." unique_id=173165340]
 script = ExtResource("99_boosts")
 inmunidad = true
 

@@ -118,6 +118,14 @@ func _correr() -> void:
 	var v1 := g1.get_node("Vision") as VisionCono
 	var gb1 := n1.get_node_or_null("GestorBoosts") as GestorBoosts
 	_comprobar(gb1 != null and gb1.ectoplasma_infinito and not gb1.inmunidad, "nivel 1 solo tiene el boost de ectoplasma")
+	gb1._espera[Boost.Tipo.ECTOPLASMA] = 0.01
+	for i in 15:
+		await physics_frame
+	var orbes1 := 0
+	for hijo in n1.get_children():
+		if hijo is Boost:
+			orbes1 += 1
+	_comprobar(orbes1 == 1, "nivel 1 (raíz Node) genera su orbe sin errores (hay %d)" % orbes1)
 	g1.global_position = Vector2(300, 400)
 	await _mover_mouse(Vector2(900, 400))
 	_comprobar(is_equal_approx(v1._distancias[VisionCono.RAYOS / 2], v1.alcance),

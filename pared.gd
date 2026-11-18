@@ -45,8 +45,8 @@ func _actualizar() -> void:
 
 
 ## Estilo de la textura (pixel art dibujado en código, con la paleta de los fondos).
-enum Estilo { LADRILLO, PIEDRA }
-@export var estilo: Estilo = Estilo.LADRILLO:
+enum Estilo { LADRILLO, PIEDRA, RUINAS }
+@export var estilo: Estilo = Estilo.RUINAS:
 	set(valor):
 		estilo = valor
 		queue_redraw()
@@ -66,10 +66,13 @@ func _draw() -> void:
 	draw_rect(Rect2(rect.position + Vector2(6.0, 8.0), rect.size), Color(0, 0, 0, 0.3))
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(Vector2i(position)) + int(tamano.x * 31.0 + tamano.y)
-	if estilo == Estilo.LADRILLO:
-		_dibujar_ladrillos(rect, rng)
-	else:
-		_dibujar_piedra(rect, rng)
+	match estilo:
+		Estilo.LADRILLO:
+			_dibujar_ladrillos(rect, rng)
+		Estilo.PIEDRA:
+			_dibujar_piedra(rect, rng)
+		_:
+			_dibujar_ruinas(rect, rng)
 	_dibujar_detalles(rect, rng)
 	draw_rect(rect.grow(-1.0), CONTORNO, false, 2.0)
 
@@ -134,3 +137,58 @@ func contorno_global() -> PackedVector2Array:
 	if not Geometry2D.is_polygon_clockwise(contorno):
 		contorno.reverse()
 	return contorno
+
+
+const YESOS: Array[Color] = [Color("4b5068"), Color("545973"), Color("444962"), Color("5a5f7a")]
+const LADRILLOS_VIEJOS: Array[Color] = [Color("5e2d2d"), Color("6d3631"), Color("522828"), Color("733c33")]
+
+
+## Muro de ruinas: yeso gris azulado desconchado, con ladrillo viejo al descubierto, grietas y
+## una cornisa clara arriba. Más oscuro y apagado, para que se funda con los fondos nocturnos.
+func _dibujar_ruinas(rect: Rect2, rng: RandomNumberGenerator) -> void:
+	draw_rect(rect, Color("33384d"))
+	# Paños de yeso con juntas.
+	var alto := 40.0
+	for f in int(ceil(rect.size.y / alto)):
+		var y := rect.position.y + f * alto
+		var c := YESOS[rng.randi() % YESOS.size()]
+		var panel := Rect2(rect.position.x + 1.0, y + 1.0, rect.size.x - 2.0, alto - 2.0).intersection(rect)
+		if panel.size.y > 1.0:
+			draw_rect(panel, c)
+			draw_rect(Rect2(panel.position, Vector2(panel.size.x, 2.0)), c.lightened(0.12))
+	# Motas de textura en el yeso.
+	for i in int(rect.size.x * rect.size.y / 160.0):
+		var p := Vector2(rng.randf_range(rect.position.x + 2.0, rect.end.x - 4.0), rng.randf_range(rect.position.y + 2.0, rect.end.y - 4.0)).snapped(Vector2(2, 2))
+		draw_rect(Rect2(p, Vector2(2, 2)), Color(0, 0, 0.1, 0.18) if rng.randf() < 0.6 else Color(1, 1, 1, 0.07))
+	# Ladrillo al descubierto donde cayó el yeso.
+	for i in int(clampf(rect.size.x * rect.size.y / 2400.0, 1.0, 9.0)):
+		var an := rng.randf_range(12.0, maxf(14.0, rect.size.x - 6.0))
+		var al := rng.randf_range(14.0, 30.0)
+		var origen := Vector2(rng.randf_range(rect.position.x + 3.0, maxf(rect.position.x + 4.0, rect.end.x - an - 3.0)),
+			rng.randf_range(rect.position.y + 6.0, maxf(rect.position.y + 7.0, rect.end.y - al - 6.0))).snapped(Vector2(2, 2))
+		var parche := Rect2(origen, Vector2(an, al)).intersection(rect.grow(-3.0))
+		if parche.size.x < 4.0 or parche.size.y < 4.0:
+			continue
+		# Contorno irregular: se "muerden" las esquinas.
+		draw_rect(Rect2(parche.position + Vector2(4, 0), parche.size - Vector2(8, 0)), Color("2a1a22"))
+		draw_rect(Rect2(parche.position + Vector2(0, 4), parche.size - Vector2(0, 8)), Color("2a1a22"))
+		var interior := parche.grow(-2.0)
+		for fila in int(ceil(interior.size.y / 6.0)):
+			var yb := interior.position.y + fila * 6.0
+			var desf := -6.0 if fila % 2 == 1 else 0.0
+			var xb := interior.position.x + desf
+			while xb < interior.end.x:
+				var ladrillo := Rect2(xb + 1.0, yb + 1.0, 10.0, 4.0).intersection(interior)
+				if ladrillo.size.x > 1.0 and ladrillo.size.y > 1.0:
+					draw_rect(ladrillo, LADRILLOS_VIEJOS[rng.randi() % LADRILLOS_VIEJOS.size()])
+				xb += 12.0
+	# Grietas en zigzag.
+	for i in int(clampf(rect.size.x * rect.size.y / 3000.0, 1.0, 8.0)):
+		var p := Vector2(rng.randf_range(rect.position.x + 6.0, rect.end.x - 6.0), rng.randf_range(rect.position.y + 4.0, rect.end.y - 30.0)).snapped(Vector2(2, 2))
+		for paso in 5:
+			var siguiente := p + Vector2(rng.randf_range(-6.0, 6.0), rng.randf_range(4.0, 8.0)).snapped(Vector2(2, 2))
+			draw_line(p, siguiente, Color(0.04, 0.04, 0.1, 0.8), 2.0)
+			p = siguiente
+	# Cornisa clara arriba (la luz da en el borde superior).
+	draw_rect(Rect2(rect.position + Vector2(1, 1), Vector2(rect.size.x - 2.0, 4.0)), Color("7d83a0"))
+	draw_rect(Rect2(rect.position + Vector2(1, 5), Vector2(rect.size.x - 2.0, 2.0)), Color("2a2e42"))

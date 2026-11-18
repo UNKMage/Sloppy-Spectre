@@ -190,7 +190,9 @@ func _animar_levitacion(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not movimiento_habilitado:
 		return
-	if event.is_action_pressed("ensuciar"):
+	# Se ensucia con la barra espaciadora (acción "ensuciar") o con el clic izquierdo del mouse.
+	var clic_izquierdo: bool = event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT
+	if event.is_action_pressed("ensuciar") or clic_izquierdo:
 		if pinturas_disponibles >= COSTO_MANCHA or ectoplasma_infinito:
 			dejar_mancha()
 

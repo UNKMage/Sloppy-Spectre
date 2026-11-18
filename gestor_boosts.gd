@@ -102,7 +102,8 @@ func _aparecer(tipo: int) -> void:
 func _buscar_posicion() -> Variant:
 	var suelo := get_tree().get_first_node_in_group("suelo")
 	var capa := suelo.get_node_or_null("CapaSuelo") as TileMapLayer if suelo else null
-	var espacio := (get_parent() as Node2D).get_world_2d().direct_space_state
+	# El nodo raíz del nivel 1 es un Node (no Node2D): el espacio físico se pide a Spooky.
+	var espacio := _ghost.get_world_2d().direct_space_state
 	var forma := CircleShape2D.new()
 	forma.radius = 34.0
 	for intento in 60:
