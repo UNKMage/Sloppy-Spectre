@@ -3,10 +3,64 @@
 [ext_resource type="Script" uid="uid://cr4tx2mt2xrsn" path="res://area_2d.gd" id="1_dl81w"]
 [ext_resource type="Texture2D" uid="uid://dvnx8oxt1uv8q" path="res://Ghost.png" id="1_gf172"]
 [ext_resource type="PackedScene" uid="uid://i25n4wq8tyql" path="res://mancha.tscn" id="2_5rgpn"]
+[ext_resource type="Texture2D" uid="uid://bsl6fyrvpva4u" path="res://personajes/animaciones/appear/Ghost1.png" id="3_err7g"]
 [ext_resource type="Script" uid="uid://dlvlxisjga82q" path="res://vision_cono.gd" id="3_vision"]
+[ext_resource type="Texture2D" uid="uid://c40uvsghj46ha" path="res://personajes/animaciones/appear/Ghost2.png" id="4_pyiik"]
+[ext_resource type="Texture2D" uid="uid://bmryfetwqbpq4" path="res://personajes/animaciones/appear/Ghost3.png" id="5_36a8j"]
+[ext_resource type="Texture2D" uid="uid://c44v10ph7bxqo" path="res://personajes/animaciones/appear/Ghost4.png" id="6_845px"]
+[ext_resource type="Texture2D" uid="uid://qvf7bwd7otcx" path="res://personajes/animaciones/appear/Ghost5.png" id="7_nf7j2"]
+[ext_resource type="Texture2D" uid="uid://0n1ra13bfdli" path="res://personajes/animaciones/appear/Ghost6.png" id="8_kdsls"]
+[ext_resource type="Texture2D" uid="uid://bpmf7pw3le2ul" path="res://personajes/animaciones/blink/Ghost1.png" id="12_hfg8o"]
+[ext_resource type="Texture2D" uid="uid://c4le016iseitj" path="res://personajes/animaciones/blink/Ghost2.png" id="13_7e6rj"]
+[ext_resource type="Texture2D" uid="uid://1rtbjdjfyxs7" path="res://personajes/animaciones/blink/Ghost3.png" id="14_8npmg"]
+[ext_resource type="Texture2D" uid="uid://wejf3bfiju7f" path="res://personajes/animaciones/blink/Ghost4.png" id="15_4gne3"]
+[ext_resource type="Texture2D" uid="uid://bbiaks7xv4fyd" path="res://personajes/animaciones/blink/Ghost5.png" id="16_ui7dk"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_6b251"]
 animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_err7g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_pyiik")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_36a8j")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_845px")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_nf7j2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_kdsls")
+}],
+"loop": 0,
+"name": &"appear",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("12_hfg8o")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_7e6rj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_8npmg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_4gne3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_ui7dk")
+}],
+"loop": 0,
+"name": &"blink",
+"speed": 5.0
+}, {
 "frames": [{
 "duration": 1.0,
 "texture": ExtResource("1_gf172")
@@ -29,7 +83,7 @@ metadata/_edit_group_ = true
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=847923331]
 scale = Vector2(3, 3)
 sprite_frames = SubResource("SpriteFrames_6b251")
-frame_progress = 0.8466066
+animation = &"appear"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1427092968]
 shape = SubResource("CapsuleShape2D_77xrk")

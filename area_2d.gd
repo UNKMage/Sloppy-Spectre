@@ -49,6 +49,38 @@ const CAPA_PAREDES := 4
 @onready var _colision: CollisionShape2D = $CollisionShape2D
 @onready var _suelo: SueloManager = get_tree().get_first_node_in_group("suelo") as SueloManager
 
+func _ready() -> void:
+	var portal := get_parent().get_node_or_null("Portal")
+	if portal:
+		global_position = portal.global_position
+	_sprite.animation_finished.connect(_on_animacion_terminada)
+	_aparecer()
+
+
+## Al entrar al nivel, Spooky no puede moverse ni ser aturdido hasta que termine de aparecer.
+func _aparecer() -> void:
+	movimiento_habilitado = false
+	inmune = true
+	_sprite.play("appear")
+
+
+func _on_animacion_terminada() -> void:
+	match _sprite.animation:
+		&"appear":
+			movimiento_habilitado = true
+			inmune = false
+			_sprite.play("default")
+			_programar_parpadeo()
+		&"blink":
+			_sprite.play("default")
+			_programar_parpadeo()
+
+
+## Espera un tiempo aleatorio y parpadea, así no es un parpadeo robótico cada X segundos.
+func _programar_parpadeo() -> void:
+	await get_tree().create_timer(randf_range(2.0, 5.0)).timeout
+	if _sprite.animation == &"default":
+		_sprite.play("blink")
 
 func _physics_process(delta: float) -> void:
 	_actualizar_velocidad(delta)
