@@ -131,16 +131,7 @@ func _etiqueta(texto: String, tamano: int, color: Color, contorno: int = 0) -> L
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return l
 
-
 func _crear_encabezado() -> void:
-	# Halo detrás del fantasma
-	var halo := Control.new()
-	halo.position = Vector2(250, 100)
-	halo.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	halo.draw.connect(func() -> void:
-		for i in 5:
-			halo.draw_circle(Vector2.ZERO, 62.0 - i * 9.0, Color(0.45, 0.35, 0.95, 0.05 + i * 0.02)))
-	add_child(halo)
 	_fantasma = Sprite2D.new()
 	_fantasma.texture = FANTASMA
 	_fantasma.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -180,26 +171,16 @@ func _crear_tarjetas() -> void:
 		_tarjetas.append(boton)
 
 
-func _estilo_tarjeta(borde: Color, fondo: Color, grosor: int) -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	s.bg_color = fondo
-	s.border_color = borde
-	s.set_border_width_all(grosor)
-	s.set_corner_radius_all(8)
-	s.shadow_color = Color(borde.r, borde.g, borde.b, 0.0 if grosor <= 3 else 0.35)
-	s.shadow_size = 0 if grosor <= 3 else 14
-	return s
-
 
 func _crear_tarjeta(datos: Dictionary) -> Button:
 	var color: Color = datos["color"]
 	var b := Button.new()
 	b.custom_minimum_size = TARJETA
 	b.focus_mode = Control.FOCUS_ALL
-	b.add_theme_stylebox_override("normal", _estilo_tarjeta(color.darkened(0.55), Color(0.07, 0.06, 0.13, 0.92), 3))
-	b.add_theme_stylebox_override("hover", _estilo_tarjeta(color, Color(0.1, 0.09, 0.19, 0.97), 5))
-	b.add_theme_stylebox_override("focus", _estilo_tarjeta(color, Color(0.1, 0.09, 0.19, 0.97), 5))
-	b.add_theme_stylebox_override("pressed", _estilo_tarjeta(Color.WHITE, Color(0.14, 0.12, 0.24, 1.0), 5))
+	b.add_theme_stylebox_override("normal", PixelCaja.nueva(Color(0.07, 0.06, 0.13), color.darkened(0.5), Color(0, 0, 0, 0)))
+	b.add_theme_stylebox_override("hover", PixelCaja.nueva(Color(0.11, 0.1, 0.2), color, color.darkened(0.55), true))
+	b.add_theme_stylebox_override("focus", PixelCaja.nueva(Color(0.11, 0.1, 0.2), color, color.darkened(0.55), true))
+	b.add_theme_stylebox_override("pressed", PixelCaja.nueva(Color(0.16, 0.14, 0.26), Color.WHITE, color, true))
 
 	var caja := VBoxContainer.new()
 	caja.set_anchors_preset(Control.PRESET_FULL_RECT)

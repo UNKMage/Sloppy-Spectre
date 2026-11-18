@@ -2,6 +2,7 @@ extends CanvasLayer
 
 ## Pantalla que se muestra al ganar o perder (la misma escena para las dos).
 const PANTALLA_FIN := preload("res://pantalla_fin.tscn")
+const PANTALLA_FINAL := preload("res://pantalla_final.tscn")
 
 @export_group("Reglas de la partida")
 ## Porcentaje de suciedad que hay que alcanzar para GANAR.
@@ -107,7 +108,8 @@ func _finalizar(victoria: bool, motivo: String) -> void:
 	if not victoria:
 		SoundManager.reproducir_gameover()
 		
-	var pantalla := PANTALLA_FIN.instantiate()
+	# Ganar sin puerta (último nivel) = pantalla final con fuegos artificiales y calificación.
+	var pantalla := (PANTALLA_FINAL if victoria else PANTALLA_FIN).instantiate()
 	add_child(pantalla)
 	pantalla.mostrar(victoria, motivo, _porcentaje_suciedad, tiempo_restante)
 

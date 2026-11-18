@@ -32,7 +32,17 @@ const COSTO_MANCHA := 5
 # Declaración de señal personalizada. Gasto de pintura
 signal pinturas_actualizadas(cantidad_restante: int)
 
-var inmune: bool = false    
+## Los Limpiadores no lo detectan ni lo aturden mientras sea true (aparición, aturdimiento previo o boost).
+var _inmune_base: bool = false
+## Boost de inmunidad (lo activa GestorBoosts, dura 10 s).
+var boost_inmunidad: bool = false
+var inmune: bool:
+	get:
+		return _inmune_base or boost_inmunidad
+	set(valor):
+		_inmune_base = valor
+## Boost de ectoplasma infinito (lo activa GestorBoosts, dura 8 s): manchar no gasta el tanque.
+var ectoplasma_infinito: bool = false
 ## Pon en false para bloquear el movimiento (ej. Stun de 3 s).
 var movimiento_habilitado: bool = true
 
@@ -181,7 +191,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not movimiento_habilitado:
 		return
 	if event.is_action_pressed("ensuciar"):
-		if pinturas_disponibles >= COSTO_MANCHA:
+		if pinturas_disponibles >= COSTO_MANCHA or ectoplasma_infinito:
 			dejar_mancha()
 
 
@@ -193,7 +203,8 @@ func dejar_mancha() -> void:
 	if _suelo.pintar(global_position) <= 0:
 		return
 
-	pinturas_disponibles -= COSTO_MANCHA
+	if not ectoplasma_infinito:
+		pinturas_disponibles -= COSTO_MANCHA
 	emit_signal("pinturas_actualizadas", pinturas_disponibles)
 	SoundManager.reproducir_disparo()
 

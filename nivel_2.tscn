@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://xl7r0nt3sod1" path="res://hud.tscn" id="6_hud"]
 [ext_resource type="PackedScene" uid="uid://cabw7hnj860tr" path="res://pared.tscn" id="7_pared"]
 [ext_resource type="PackedScene" uid="uid://v6kh7lnqr68i" path="res://puerta_salida.tscn" id="8_ug47r"]
+[ext_resource type="Script" path="res://gestor_boosts.gd" id="99_boosts"]
 
 [node name="Nivel2" type="Node2D" unique_id=1837247492]
 script = ExtResource("1_nivel")
@@ -78,6 +79,10 @@ position = Vector2(656, 330)
 
 [node name="PuertaSalida" parent="." unique_id=398286724 groups=["puerta_salida"] instance=ExtResource("8_ug47r")]
 siguiente_nivel_ruta = "res://nivel_3.tscn"
+
+[node name="GestorBoosts" type="Node" parent="."]
+script = ExtResource("99_boosts")
+inmunidad = true
 
 [connection signal="suciedad_actualizada" from="Suelo" to="HUD" method="actualizar_porcentaje_suciedad"]
 [connection signal="pinturas_actualizadas" from="ghost" to="HUD" method="_on_ghost_pinturas_actualizadas"]

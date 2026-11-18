@@ -17,7 +17,7 @@ extends CharacterBody2D
 
 @export_group("Depuración")
 ## Dibuja los círculos de detección y pérdida alrededor del Limpiador.
-@export var mostrar_rangos: bool = true
+@export var mostrar_rangos: bool = false
 
 @export_group("Linterna")
 ## Si es false, la linterna está apagada y no aturde.

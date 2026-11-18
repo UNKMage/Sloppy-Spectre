@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" path="res://suelo.tscn" id="3_suelo"]
 [ext_resource type="PackedScene" uid="uid://d12ch4vr7k737" path="res://limpiador.tscn" id="5_lquwl"]
 [ext_resource type="PackedScene" uid="uid://v6kh7lnqr68i" path="res://puerta_salida.tscn" id="7_5vw27"]
+[ext_resource type="Script" path="res://gestor_boosts.gd" id="99_boosts"]
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_af0o8"]
 vertices = PackedVector2Array(1150, 630, 10, 630, 10, 10, 1150, 10)
@@ -49,6 +50,9 @@ position = Vector2(1136, 616)
 
 [node name="ghost" parent="." unique_id=1140925187 instance=ExtResource("2_h2yge")]
 inclinacion_max_grados = 0.0
+
+[node name="GestorBoosts" type="Node" parent="."]
+script = ExtResource("99_boosts")
 
 [connection signal="pinturas_actualizadas" from="ghost" to="HUD" method="_on_ghost_pinturas_actualizadas"]
 

@@ -69,7 +69,11 @@ func activar_puerta() -> void:
 	visible = true
 	monitoring = true
 	monitorable = true
-	
+
+	# Aviso de nivel superado: ya puedes ir a la puerta.
+	if get_tree().current_scene:
+		FuegosArtificiales.celebrar_nivel(get_tree().current_scene)
+
 	# Eliminar a los limpiadores
 	var enemigos = get_tree().get_nodes_in_group("limpiador")
 	for enemigo in enemigos:

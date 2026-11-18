@@ -76,6 +76,19 @@ func _correr() -> void:
 			estelas += 1
 	_comprobar(estelas == 3, "3 estelas de polvo sin material (hay %d)" % estelas)
 
+	var gb3 := n3.get_node_or_null("GestorBoosts") as GestorBoosts
+	_comprobar(gb3 != null and gb3.ectoplasma_infinito and gb3.inmunidad, "nivel 3 tiene los dos boosts")
+	ghost.pinturas_disponibles = 50
+	ghost.ectoplasma_infinito = true
+	ghost.global_position = Vector2(700, 380)
+	ghost.dejar_mancha()
+	_comprobar(ghost.pinturas_disponibles == 50, "ectoplasma infinito: manchar no gasta el tanque")
+	ghost.ectoplasma_infinito = false
+	ghost.boost_inmunidad = true
+	_comprobar(ghost.inmune, "boost de inmunidad activa 'inmune'")
+	ghost.boost_inmunidad = false
+	_comprobar(ghost.inmune == ghost._inmune_base, "al acabar el boost, la inmunidad vuelve a su valor normal")
+
 	var sin_material := true
 	for p in get_nodes_in_group("paredes"):
 		if (p as CanvasItem).material != null:
@@ -103,6 +116,8 @@ func _correr() -> void:
 	var n1 := await _cargar("res://main.tscn")
 	var g1 := n1.get_node("ghost") as Area2D
 	var v1 := g1.get_node("Vision") as VisionCono
+	var gb1 := n1.get_node_or_null("GestorBoosts") as GestorBoosts
+	_comprobar(gb1 != null and gb1.ectoplasma_infinito and not gb1.inmunidad, "nivel 1 solo tiene el boost de ectoplasma")
 	g1.global_position = Vector2(300, 400)
 	await _mover_mouse(Vector2(900, 400))
 	_comprobar(is_equal_approx(v1._distancias[VisionCono.RAYOS / 2], v1.alcance),
