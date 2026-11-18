@@ -23,11 +23,15 @@ func _ready() -> void:
 	area_entered.connect(_on_area_entered)
 	area_exited.connect(_on_area_exited)
 	_hud = get_tree().get_first_node_in_group("hud")
+	_crear_particulas_recarga()
+
 
 
 func _process(delta: float) -> void:
 	_tiempo += delta
 	queue_redraw()
+	if _particulas:
+		_particulas.emitting = _jugador != null and _jugador.pinturas_disponibles < capacidad
 
 	if _jugador == null:
 		SoundManager.detener_recarga()
@@ -173,3 +177,28 @@ func _draw() -> void:
 		var y := radio * 0.5 - fase * radio * 1.7
 		var p2 := (Vector2(x, y) / PIXEL).round() * PIXEL
 		draw_rect(Rect2(p2 - Vector2(PIXEL, PIXEL) * 0.5, Vector2(PIXEL, PIXEL)), Color(0.75, 0.95, 1.0, sin(fase * PI) * 0.9))
+
+
+## Motas cian que suben desde el portal mientras Spooky recarga su tanque.
+var _particulas: CPUParticles2D
+
+
+func _crear_particulas_recarga() -> void:
+	_particulas = CPUParticles2D.new()
+	_particulas.emitting = false
+	_particulas.amount = 28
+	_particulas.lifetime = 1.3
+	_particulas.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
+	_particulas.emission_sphere_radius = radio * 0.6
+	_particulas.direction = Vector2(0.0, -1.0)
+	_particulas.spread = 25.0
+	_particulas.gravity = Vector2(0.0, -20.0)
+	_particulas.initial_velocity_min = 25.0
+	_particulas.initial_velocity_max = 55.0
+	_particulas.scale_amount_min = 2.0
+	_particulas.scale_amount_max = 4.0
+	var g := Gradient.new()
+	g.offsets = PackedFloat32Array([0.0, 0.2, 1.0])
+	g.colors = PackedColorArray([Color(0.7, 0.95, 1.0, 0.0), Color(0.7, 0.95, 1.0, 0.95), Color(0.5, 0.4, 1.0, 0.0)])
+	_particulas.color_ramp = g
+	add_child(_particulas)

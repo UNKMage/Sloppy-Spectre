@@ -62,6 +62,7 @@ func _ready() -> void:
 	_crear_ectoplasma_visual()
 	for enemigo in get_tree().get_nodes_in_group("enemigos"):
 		(enemigo as CanvasItem).material = _material_ocultar
+		_heredar_material(enemigo)
 		var estela := EstelaPolvo.new()
 		estela.objetivo = enemigo as Node2D
 		estela.z_index = 2
@@ -83,6 +84,15 @@ func _crear_ectoplasma_visual() -> void:
 	suelo.add_child(visual)
 	visual.iniciar(suelo, capa)
 	capa.visible = false
+
+
+## Un material solo afecta al nodo que lo lleva: los hijos visuales (como el AnimatedSprite2D
+## del Limpiador) deben usar el material de su padre para ocultarse también.
+func _heredar_material(nodo: Node) -> void:
+	for hijo in nodo.get_children():
+		if hijo is CanvasItem:
+			(hijo as CanvasItem).use_parent_material = true
+		_heredar_material(hijo)
 
 
 func _crear_material(brillo_fuera: float, opacidad_fuera: float) -> ShaderMaterial:

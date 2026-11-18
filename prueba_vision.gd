@@ -63,6 +63,12 @@ func _correr() -> void:
 		if (e as CanvasItem).material == null:
 			todos_con_material = false
 	_comprobar(enemigos.size() == 3 and todos_con_material, "3 enemigos con material (hay %d)" % enemigos.size())
+	var hijos_ocultos := true
+	for e in enemigos:
+		for hijo in e.get_children():
+			if hijo is CanvasItem and not (hijo as CanvasItem).use_parent_material:
+				hijos_ocultos = false
+	_comprobar(hijos_ocultos, "sprites de los enemigos usan el material de ocultar")
 
 	var estelas := 0
 	for hijo in n3.get_children():
@@ -79,15 +85,16 @@ func _correr() -> void:
 	_comprobar(portal != null and portal.material == null, "Portal sin material")
 	_comprobar(ghost.material == null, "ghost sin material")
 
-	ghost.global_position = Vector2(660, 324)
-	await _mover_mouse(Vector2(1000, 324))
-	_comprobar(absf(vision._distancias[VisionCono.RAYOS / 2] - 60.0) < 8.0,
-		"mouse a la derecha: rayo central ~60 (%.1f)" % vision._distancias[VisionCono.RAYOS / 2])
+	ghost.global_position = Vector2(800, 324)
+	await _mover_mouse(Vector2(1100, 324))
+	_comprobar(absf(vision._distancias[VisionCono.RAYOS / 2] - 67.0) < 8.0,
+		"mouse a la derecha: rayo central ~67 (%.1f)" % vision._distancias[VisionCono.RAYOS / 2])
 
-	await _mover_mouse(Vector2(100, 324))
+	ghost.global_position = Vector2(400, 200)
+	await _mover_mouse(Vector2(0, 200))
 	_comprobar(absf(absf(rad_to_deg(vision._angulo)) - 180.0) < 5.0, "mouse a la izquierda: ángulo ~180° (%.1f)" % rad_to_deg(vision._angulo))
-	_comprobar(absf(vision._distancias[VisionCono.RAYOS / 2] - 220.0) < 8.0,
-		"mouse a la izquierda: rayo central ~220 (%.1f)" % vision._distancias[VisionCono.RAYOS / 2])
+	_comprobar(absf(vision._distancias[VisionCono.RAYOS / 2] - 115.0) < 8.0,
+		"mouse a la izquierda: rayo central ~115 (%.1f)" % vision._distancias[VisionCono.RAYOS / 2])
 	for i in 90:
 		await physics_frame
 	await _descargar(n3)

@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://dvnx8oxt1uv8q" path="res://Ghost.png" id="1_gf172"]
 [ext_resource type="PackedScene" uid="uid://i25n4wq8tyql" path="res://mancha.tscn" id="2_5rgpn"]
 [ext_resource type="Script" uid="uid://dlvlxisjga82q" path="res://vision_cono.gd" id="3_vision"]
+[ext_resource type="Script" path="res://efectos_particulas.gd" id="4_efectos"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_6b251"]
 animations = [{
@@ -37,3 +38,6 @@ shape = SubResource("CapsuleShape2D_77xrk")
 [node name="Vision" type="Node2D" parent="." unique_id=1330132571]
 z_index = 3
 script = ExtResource("3_vision")
+
+[node name="Efectos" type="Node2D" parent="."]
+script = ExtResource("4_efectos")
