@@ -29,6 +29,8 @@ const PAGINAS := {
 	],
 }
 
+## true cuando ya se mostró la introducción al abrir el juego (una vez por ejecución).
+static var inicio_mostrado: bool = false
 static var _id: String = "intro"
 static var _siguiente: String = "res://main.tscn"
 
@@ -47,6 +49,7 @@ var _caracteres := 0.0
 var _t := 0.0
 var _saliendo := false
 var _luz: Control
+var _luz_a := 1.0
 
 
 ## Abre una historia ("intro" o "final") y, al terminar, pasa a la escena `siguiente`.
@@ -132,6 +135,7 @@ func _construir() -> void:
 	_limpiador.scale = Vector2(7, 7)
 	_limpiador.position = Vector2(830, 346)
 	_limpiador.visible = false
+	_limpiador.flip_h = true  # el sprite mira a la derecha; debe mirar a Spooky
 	add_child(_limpiador)
 
 	# Barras de cine arriba y abajo
@@ -194,13 +198,15 @@ func _dibujar_puntos() -> void:
 func _dibujar_luz() -> void:
 	if not _limpiador.visible:
 		return
+	if _luz_a <= 0.0:
+		return
 	var origen := _limpiador.position + Vector2(-50, -10)
 	var puntas := [Vector2(-420, -120), Vector2(-420, 150)]
 	for k in 4:
 		var f := 1.0 - k * 0.22
 		var a: Vector2 = origen + puntas[0] * f
 		var b: Vector2 = origen + puntas[1] * f
-		_luz.draw_colored_polygon(PackedVector2Array([origen, a, b]), Color(1.0, 0.9, 0.5, 0.07))
+		_luz.draw_colored_polygon(PackedVector2Array([origen, a, b]), Color(1.0, 0.9, 0.5, 0.07 * _luz_a))
 
 
 # --- Páginas ---
@@ -226,6 +232,14 @@ func _siguiente_pagina() -> void:
 
 	_poner_personaje(_spooky, p["spooky"], Vector2(330, 330))
 	_poner_personaje(_limpiador, p["limpiador"], Vector2(830, 346))
+	_luz_a = 1.0
+	if p["limpiador"] == "derrotado":
+		# "Sin pilas": la linterna parpadea y se apaga.
+		var tl := create_tween()
+		tl.tween_interval(1.2)
+		for v in [0.2, 1.0, 0.1, 0.7, 0.0]:
+			tl.tween_property(self, "_luz_a", v, 0.07)
+			tl.tween_interval(0.12)
 	_texto.text = p["texto"]
 	_texto.visible_characters = 0
 	_caracteres = 0.0

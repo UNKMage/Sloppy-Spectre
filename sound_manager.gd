@@ -12,9 +12,68 @@ var _player_alerta: AudioStreamPlayer = null
 var _player_recarga: AudioStreamPlayer = null
 
 
+## --- Música de fondo (se sintetiza al abrir el juego, ver MusicaProcedural) ---
+const MUSICA := preload("res://musica_procedural.gd")
+const NIVELES_JUEGO := ["res://main.tscn", "res://nivel_1.tscn", "res://nivel_2.tscn", "res://nivel_3.tscn", "res://tutorial_nivel.tscn"]
+const VOLUMEN_MUSICA_DB := -9.0
+var _musica: AudioStreamPlayer = null
+var _pistas: Dictionary = {}
+var _hilo: Thread = null
+var _pista_actual: String = ""
+var _volumen_fade: float = 0.0  # 0..1, para los fundidos entre pistas
+
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_cargar_sonidos()
+	_musica = AudioStreamPlayer.new()
+	_musica.volume_db = -80.0
+	add_child(_musica)
+	_hilo = Thread.new()
+	_hilo.start(_generar_pistas)
+
+
+func _exit_tree() -> void:
+	if _hilo != null and _hilo.is_started():
+		_hilo.wait_to_finish()
+
+
+func _generar_pistas() -> void:
+	var resultado := {}
+	for nombre in ["menu", "juego"]:
+		resultado[nombre] = MUSICA.generar(nombre)
+	_pistas_listas.call_deferred(resultado)
+
+
+func _pistas_listas(resultado: Dictionary) -> void:
+	_pistas = resultado
+
+
+func _pista_deseada() -> String:
+	var escena := get_tree().current_scene
+	if escena != null and escena.scene_file_path in NIVELES_JUEGO:
+		return "juego"
+	return "menu"
+
+
+func _process(delta: float) -> void:
+	if _pistas.is_empty():
+		return
+	if AudioServer.get_bus_index("Musica") != -1 and _musica.bus != &"Musica":
+		_musica.bus = &"Musica"
+	var deseada := _pista_deseada()
+	if deseada != _pista_actual:
+		# Baja la actual y, al llegar a silencio, cambia de pista.
+		_volumen_fade = move_toward(_volumen_fade, 0.0, delta * 2.5)
+		if _volumen_fade <= 0.0:
+			_pista_actual = deseada
+			_musica.stream = _pistas[deseada]
+			_musica.play()
+	else:
+		_volumen_fade = move_toward(_volumen_fade, 1.0, delta * 1.2)
+	# En pausa la música baja para que se oiga el menú.
+	var duck := -7.0 if get_tree().paused else 0.0
+	_musica.volume_db = linear_to_db(maxf(_volumen_fade, 0.0001)) + VOLUMEN_MUSICA_DB + duck
 
 
 func _cargar_sonidos() -> void:

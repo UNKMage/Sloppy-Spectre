@@ -8,9 +8,11 @@ extends Node
 ## Lo que ya viste se guarda (Opciones.visto), así no se repite. Pulsa T para saltarlo.
 
 const NIVEL_1 := "res://main.tscn"
+const ESCENA_TUTORIAL := "res://tutorial_nivel.tscn"
 const PASOS := [
 	{"id": "luz", "titulo": "TU LUZ", "texto": "Mueve el mouse para apuntar tu cono de luz. Solo lo que alumbras se ve con claridad: el resto queda en sombra.", "icono": "mouse", "color": Color(0.56, 0.92, 1.0), "max": 14.0},
 	{"id": "ensuciar", "titulo": "ENSUCIA", "texto": "Pulsa ESPACIO o haz clic izquierdo para soltar ectoplasma. Gasta tu tanque: lo recargas en el portal del centro.", "icono": "espacio", "color": Color(0.45, 1.0, 0.55), "max": 20.0},
+	{"id": "orbe", "titulo": "RECOGE EL ORBE", "texto": "Los orbes verdes te dan ectoplasma infinito unos segundos. Hay uno marcado con una flecha: ¡tócalo! (Más adelante habrá orbes azules de inmunidad.)", "icono": "orbe", "color": Color(0.5, 1.0, 0.7), "max": 30.0},
 	{"id": "limpiadores", "titulo": "CUIDADO CON LOS LIMPIADORES", "texto": "En la sombra no los ves: alumbra para encontrarlos. Si su linterna te toca, quedas aturdido. ¡Un '!' significa que te vieron!", "icono": "alerta", "color": Color(1.0, 0.45, 0.4), "max": 9.0},
 	{"id": "meta", "titulo": "LA META", "texto": "Ensucia el 100 % de la barra antes de que se acabe el tiempo. Ojo: los Limpiadores borran tus manchas.", "icono": "meta", "color": Color(1.0, 0.83, 0.3), "max": 8.0},
 ]
@@ -50,7 +52,7 @@ func _ready() -> void:
 	_ghost = get_parent() as Node2D
 	_suelo = get_tree().get_first_node_in_group("suelo")
 	var escena := get_tree().current_scene
-	var hacer_basico := escena != null and escena.scene_file_path == NIVEL_1 and not Opciones.visto("tutorial_basico")
+	var hacer_basico := escena != null and escena.scene_file_path == ESCENA_TUTORIAL
 	var gestor := escena.get_node_or_null("GestorBoosts") if escena else null
 	var hay_orbes_nuevos := false
 	if gestor:
@@ -64,6 +66,13 @@ func _ready() -> void:
 		_suelo.celda_pintada.connect(func(_c: Vector2i, _total: int) -> void: _manchas_paso += 1)
 	if hacer_basico:
 		_activo = true
+		# Aquí se practica sin presión: sin cronómetro.
+		var hud := get_tree().get_first_node_in_group("hud")
+		if hud:
+			hud.set("cronometro_activo", false)
+			var tiempo := hud.get_node_or_null("Tiempo")
+			if tiempo:
+				tiempo.visible = false
 		_siguiente_paso()
 
 
@@ -99,6 +108,15 @@ func _siguiente_paso() -> void:
 		_terminar()
 		return
 	var p: Dictionary = PASOS[_paso]
+	if p["id"] == "luz" and _ghost:
+		# Parte del ángulo actual: así el salto inicial del cono no cuenta como giro.
+		var vision := _ghost.get_node_or_null("Vision")
+		if vision:
+			_angulo_prev = vision.get("_angulo")
+	if p["id"] == "orbe":
+		var gestor := get_tree().current_scene.get_node_or_null("GestorBoosts")
+		if gestor:
+			gestor.call("_aparecer", 0)
 	_titulo.text = p["titulo"]
 	_titulo.add_theme_color_override("font_color", p["color"])
 	_texto.text = p["texto"]
@@ -123,6 +141,14 @@ func _vigilar_paso() -> void:
 			listo = _angulo_acum > 2.0 and _paso_t > 2.0
 		"ensuciar":
 			listo = _manchas_paso >= 3
+		"orbe":
+			var gestor := get_tree().current_scene.get_node_or_null("GestorBoosts")
+			if gestor:
+				var restante: Dictionary = gestor.get("_restante")
+				listo = restante.get(0, 0.0) > 0.0
+			if listo:
+				_paso_t = maxf(_paso_t, float(p["max"]) - 1.5)  # deja ver el efecto un momento
+				listo = false
 		"limpiadores", "meta":
 			listo = _paso_t >= float(p["max"]) * 0.6
 	if listo or _paso_t >= float(p["max"]):
@@ -134,18 +160,35 @@ func _saltar() -> void:
 
 
 func _terminar() -> void:
+	if not _activo:
+		return
 	_activo = false
-	_panel.visible = false
 	Opciones.marcar_visto("tutorial_basico")
+	Opciones.marcar_visto("orbe_0")
+	# Fin del entrenamiento: aviso y a la pantalla de carga del nivel 1.
+	_titulo.text = "¡LISTO!"
+	_titulo.add_theme_color_override("font_color", Color(1.0, 0.83, 0.3))
+	_texto.text = "Ya sabes jugar. Ahora sí: el nivel 1 te espera."
+	_contador.text = ""
+	_icono_tipo = "meta"
+	_icono.queue_redraw()
+	if _flecha:
+		_flecha.visible = false
+	_panel.modulate.a = 1.0
+	_panel.visible = true
+	await get_tree().create_timer(1.8).timeout
+	PantallaCarga.cargar_nivel(NIVEL_1)
 
 
 # --- Carteles de orbes ---
 
 func _on_orbe(tipo: int, posicion: Vector2) -> void:
 	var d: Dictionary = ORBES.get(tipo, {})
-	if d.is_empty() or Opciones.visto(d["clave"]):
+	var en_tutorial := _activo
+	if d.is_empty() or (not en_tutorial and Opciones.visto(d["clave"])):
 		return
-	Opciones.marcar_visto(d["clave"])
+	if not en_tutorial:
+		Opciones.marcar_visto(d["clave"])
 	_orbe_titulo.text = d["titulo"]
 	# La duración depende del nivel (en el nivel 1 el ectoplasma infinito dura menos).
 	var gestor := get_tree().current_scene.get_node_or_null("GestorBoosts")
@@ -156,8 +199,9 @@ func _on_orbe(tipo: int, posicion: Vector2) -> void:
 	var color: Color = Boost.COLORES[tipo]["cuerpo"]
 	_orbe_titulo.add_theme_color_override("font_color", Boost.COLORES[tipo]["luz"])
 	_orbe_panel.add_theme_stylebox_override("panel", PixelCaja.nueva(Color(0.05, 0.04, 0.1), color, (Boost.COLORES[tipo]["oscuro"] as Color)))
-	_orbe_panel.visible = true
-	_orbe_resta = 8.0
+	if not en_tutorial:  # en el tutorial lo explica el cartel de abajo; aquí solo la flecha
+		_orbe_panel.visible = true
+		_orbe_resta = 8.0
 	if _flecha == null:
 		_flecha = Node2D.new()
 		_flecha.z_index = 20
@@ -266,6 +310,13 @@ func _dibujar_icono() -> void:
 			_icono.draw_rect(Rect2(-5, -18, 10, 24), Color.WHITE)
 			_icono.draw_rect(Rect2(-5, 11, 10, 8), Color.WHITE)
 			_icono.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		"orbe":
+			var pulso_o := 1.0 + 0.12 * sin(_t * 5.0)
+			for k in 3:
+				_icono.draw_circle(Vector2(40, 40), (30.0 - k * 7.0) * pulso_o, Color(0.45, 1.0, 0.65, 0.18 + k * 0.1))
+			_icono.draw_rect(Rect2(28, 28, 24, 24), Color(0.1, 0.3, 0.2))
+			_icono.draw_rect(Rect2(31, 31, 18, 18), Color(0.5, 1.0, 0.7))
+			_icono.draw_rect(Rect2(34, 34, 6, 6), Color.WHITE)
 		"meta":
 			_icono.draw_rect(Rect2(10, 56, 60, 10), oscuro)
 			_icono.draw_rect(Rect2(12, 58, 56, 6), Color(0.1, 0.09, 0.16))

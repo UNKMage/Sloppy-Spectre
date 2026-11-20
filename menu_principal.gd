@@ -28,6 +28,11 @@ func _ready() -> void:
 	# Si venimos de un Game Over, el juego estaba pausado: sin esto los botones no responderían.
 	get_tree().paused = false
 	Opciones.cargar()
+	# Al abrir el juego siempre se cuenta la historia antes del menú.
+	if not Historia.inicio_mostrado:
+		Historia.inicio_mostrado = true
+		Historia.contar.call_deferred(get_tree(), "intro", "res://menu_principal.tscn")
+		return
 	# La fuente pixel no trae acentos: se copia y se le da la fuente normal como respaldo.
 	_fuente = FUENTE_PIXEL.duplicate()
 	_fuente.fallbacks = [ThemeDB.fallback_font]
@@ -276,10 +281,9 @@ func _abrir_nivel(escena: String) -> void:
 	var tw := create_tween()
 	tw.tween_property(_cortina, "color:a", 1.0, 0.35)
 	tw.tween_callback(func() -> void:
-		# La primera vez que se entra al nivel 1 se cuenta la historia antes de jugar.
-		if escena == "res://main.tscn" and not Opciones.visto("intro"):
-			Opciones.marcar_visto("intro")
-			Historia.contar(get_tree(), "intro", escena)
+		# La primera vez (o tras "Repetir tutorial") el nivel 1 va precedido del tutorial.
+		if escena == "res://main.tscn" and not Opciones.visto("tutorial_basico"):
+			get_tree().change_scene_to_file("res://tutorial_nivel.tscn")
 		else:
 			get_tree().change_scene_to_file(escena))
 

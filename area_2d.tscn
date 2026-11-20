@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://efectos_particulas.gd" id="4_efectos"]
 [ext_resource type="Script" path="res://game_feel.gd" id="5_feel"]
 [ext_resource type="Script" path="res://tutorial.gd" id="6_tutorial"]
+[ext_resource type="Script" path="res://dev_trucos.gd" id="7_dev"]
 [ext_resource type="Texture2D" uid="uid://c40uvsghj46ha" path="res://personajes/animaciones/appear/Ghost2.png" id="4_pyiik"]
 [ext_resource type="Texture2D" uid="uid://bmryfetwqbpq4" path="res://personajes/animaciones/appear/Ghost3.png" id="5_36a8j"]
 [ext_resource type="Texture2D" uid="uid://c44v10ph7bxqo" path="res://personajes/animaciones/appear/Ghost4.png" id="6_845px"]
@@ -103,3 +104,6 @@ script = ExtResource("5_feel")
 
 [node name="Tutorial" type="Node" parent="."]
 script = ExtResource("6_tutorial")
+
+[node name="DevTrucos" type="Node" parent="."]
+script = ExtResource("7_dev")
