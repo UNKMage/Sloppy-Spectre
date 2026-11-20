@@ -14,6 +14,16 @@ func _ready() -> void:
 	Opciones.cargar()
 
 
+func _input(event: InputEvent) -> void:
+	# F11 o Alt+Enter: alterna pantalla completa en cualquier escena (y lo guarda).
+	if event is InputEventKey and event.pressed and not event.echo:
+		var k: Key = event.physical_keycode
+		if k == KEY_F11 or (k == KEY_ENTER and event.alt_pressed):
+			Opciones.set_pantalla_completa(not Opciones.pantalla_completa)
+			Opciones.guardar()
+			get_viewport().set_input_as_handled()
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if not event.is_action_pressed("ui_cancel"):
 		return

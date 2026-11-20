@@ -24,8 +24,8 @@ PantallaCarga="*uid://u2by7lbu3oq1"
 
 [display]
 
+window/size/mode=3
 window/stretch/mode="canvas_items"
-window/stretch/scale_mode="integer"
 
 [importer_defaults]
 
@@ -102,4 +102,5 @@ ensuciar={
 textures/canvas_textures/default_texture_filter=0
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="mobile"
+environment/defaults/default_clear_color=Color(0.059, 0.051, 0.106, 1)
 2d/snap/snap_2d_transforms_to_pixel=true
