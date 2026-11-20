@@ -70,7 +70,8 @@ func activar_puerta() -> void:
 	monitoring = true
 	monitorable = true
 
-	# Aviso de nivel superado: ya puedes ir a la puerta.
+	# Aviso de nivel superado: ya puedes ir a la puerta (con un temblor de pantalla).
+	GameFeel.sacudir(get_tree(), 6.0, 0.45)
 	if get_tree().current_scene:
 		FuegosArtificiales.celebrar_nivel(get_tree().current_scene)
 

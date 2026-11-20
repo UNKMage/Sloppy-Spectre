@@ -35,6 +35,7 @@ func reproducir_sfx(stream: AudioStream, volumen_db: float = 0.0) -> void:
 		return
 		
 	var player := AudioStreamPlayer.new()
+	_usar_bus_efectos(player)
 	player.stream = stream
 	player.volume_db = volumen_db
 	player.process_mode = Node.PROCESS_MODE_ALWAYS
@@ -57,6 +58,7 @@ func iniciar_recarga() -> void:
 		return
 	if _player_recarga == null:
 		_player_recarga = AudioStreamPlayer.new()
+		_usar_bus_efectos(_player_recarga)
 		_player_recarga.stream = snd_recarga
 		_player_recarga.volume_db = -3.0
 		_player_recarga.process_mode = Node.PROCESS_MODE_ALWAYS
@@ -76,6 +78,7 @@ func reproducir_alerta() -> void:
 		return
 	if _player_alerta == null:
 		_player_alerta = AudioStreamPlayer.new()
+		_usar_bus_efectos(_player_alerta)
 		_player_alerta.stream = snd_alerta
 		_player_alerta.volume_db = 1.0
 		_player_alerta.process_mode = Node.PROCESS_MODE_ALWAYS
@@ -93,3 +96,16 @@ func reproducir_gameover() -> void:
 	detener_alerta()
 	detener_recarga()
 	reproducir_sfx(snd_gameover, 0.0)
+
+
+## Los efectos suenan por el bus "Efectos" (lo crea Opciones), para tener su propio volumen.
+func _usar_bus_efectos(player: AudioStreamPlayer) -> void:
+	if AudioServer.get_bus_index("Efectos") != -1:
+		player.bus = "Efectos"
+
+
+## Al pausar el juego se callan la alerta y la recarga; al continuar, siguen donde iban.
+func pausar_juego(pausado: bool) -> void:
+	for p in [_player_alerta, _player_recarga]:
+		if p != null:
+			p.stream_paused = pausado

@@ -9,7 +9,7 @@ const FANTASMA := preload("res://Ghost.png")
 const COLOR_VICTORIA := Color(0.45, 1.0, 0.55)
 const COLOR_DERROTA := Color(1.0, 0.35, 0.38)
 ## Porcentaje de suciedad que hay que alcanzar para ganar (se dibuja como marca en la barra).
-const META := 80.0
+const META := 100.0
 ## Segundos que los botones esperan antes de activarse. Si el jugador está presionando
 ## Espacio (para manchar) justo cuando termina la partida, no debe "pulsar" un botón sin querer.
 const RETRASO_BOTONES := 0.8
@@ -266,7 +266,7 @@ func _dibujar_barra() -> void:
 	# Marca de la meta
 	var x_meta := (ancho - 4.0 * u) * META / 100.0 + 2.0 * u
 	_barra.draw_rect(Rect2(x_meta - 2.0, -6.0, 4.0, alto + 12.0), Color.WHITE)
-	_barra.draw_string(_fuente, Vector2(x_meta - 50.0, -10.0), "META %d%%" % int(META), HORIZONTAL_ALIGNMENT_CENTER, 100.0, 12, Color(1, 1, 1, 0.85))
+	_barra.draw_string(_fuente, Vector2(x_meta - 100.0, -10.0), "META %d%%" % int(META), HORIZONTAL_ALIGNMENT_RIGHT, 100.0, 12, Color(1, 1, 1, 0.85))
 	_barra.draw_string_outline(_fuente, Vector2(0, alto * 0.5 + 8.0), "%d%%" % int(_pct_mostrado), HORIZONTAL_ALIGNMENT_CENTER, ancho, 22, 8, Color(0.03, 0.01, 0.05))
 	_barra.draw_string(_fuente, Vector2(0, alto * 0.5 + 8.0), "%d%%" % int(_pct_mostrado), HORIZONTAL_ALIGNMENT_CENTER, ancho, 22, Color.WHITE)
 

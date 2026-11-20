@@ -8,7 +8,7 @@ const FUENTE_PIXEL := preload("res://addons/pixel_bars/font/pixel_ui_font.fnt")
 const FANTASMA := preload("res://Ghost.png")
 const ORO := Color(1.0, 0.83, 0.3)
 const VERDE := Color(0.45, 1.0, 0.55)
-const META := 80.0
+const META := 100.0
 ## Segundos antes de activar los botones (por si el jugador sigue presionando Espacio).
 const RETRASO_BOTONES := 1.4
 ## Tiempo restante (en segundos) para ganar 3 y 2 estrellas.
@@ -287,8 +287,8 @@ func _dibujar_estrellas() -> void:
 
 func _crear_botones() -> void:
 	var defs := [
-		["Menú principal", VERDE, _ir_al_menu],
-		["Repetir nivel", Color(0.65, 0.7, 1.0), _reintentar],
+		["Ver el final", Color(1.0, 0.83, 0.3), _ver_final],
+		["Menú principal", Color(0.65, 0.7, 1.0), _ir_al_menu],
 	]
 	for i in defs.size():
 		var d: Array = defs[i]
@@ -367,3 +367,9 @@ func _salir(accion: Callable) -> void:
 	var tw := create_tween()
 	tw.tween_property(_cortina, "color:a", 1.0, 0.3)
 	tw.tween_callback(accion)
+
+
+## Cierra la historia: epílogo y créditos, y de ahí al menú.
+func _ver_final() -> void:
+	_salir(func() -> void:
+		Historia.contar(get_tree(), "final", "res://creditos.tscn"))

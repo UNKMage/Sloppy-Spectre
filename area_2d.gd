@@ -88,7 +88,7 @@ func _on_animacion_terminada() -> void:
 
 ## Espera un tiempo aleatorio y parpadea, así no es un parpadeo robótico cada X segundos.
 func _programar_parpadeo() -> void:
-	await get_tree().create_timer(randf_range(2.0, 5.0)).timeout
+	await get_tree().create_timer(randf_range(2.0, 5.0), false).timeout
 	if _sprite.animation == &"default":
 		_sprite.play("blink")
 
@@ -222,14 +222,14 @@ func aplicar_aturdimiento() -> bool:
 	movimiento_habilitado = false
 	modulate = Color(0.4, 0.4, 0.4) # Se oscurece al estar aturdido
 	
-	await get_tree().create_timer(3.0).timeout
+	await get_tree().create_timer(3.0, false).timeout
 	
 	# 2. Despierta con inmunidad
 	movimiento_habilitado = true
 	inmune = true
 	modulate = Color(1, 1, 1, 0.5) # Semitransparente por la inmunidad
 	
-	await get_tree().create_timer(1.5).timeout
+	await get_tree().create_timer(1.5, false).timeout
 	
 	# 3. Fin de inmunidad
 	inmune = false

@@ -53,6 +53,7 @@ inclinacion_max_grados = 0.0
 
 [node name="GestorBoosts" type="Node" parent="."]
 script = ExtResource("99_boosts")
+duracion_ectoplasma = 4.0
 
 [connection signal="pinturas_actualizadas" from="ghost" to="HUD" method="_on_ghost_pinturas_actualizadas"]
 

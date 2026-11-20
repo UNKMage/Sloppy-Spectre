@@ -12,7 +12,7 @@ Ensucia el suelo con ectoplasma para aumentar el porcentaje de suciedad.
 Tu vista es un cono que apunta al mouse: fuera de él el escenario queda en sombra y no ves ectoplasma ni Limpiadores.
 Esquiva la linterna del Limpiador: si te alcanza, quedas aturdido 3 segundos.
 Regresa al Portal Espiritual del centro para recargar tu tanque (100 unidades).
-Gana alcanzando el 80 % de suciedad antes de que pasen 120 segundos.
+Gana alcanzando el 100 % de suciedad antes de que pasen 120 segundos.
 Pierde si se acaba el tiempo o si la suciedad llega a 0 %.
 Controles
 Acción	Teclas

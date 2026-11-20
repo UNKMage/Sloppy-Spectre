@@ -6,7 +6,7 @@ const PANTALLA_FINAL := preload("res://pantalla_final.tscn")
 
 @export_group("Reglas de la partida")
 ## Porcentaje de suciedad que hay que alcanzar para GANAR.
-@export var meta_victoria: float = 80.0
+@export var meta_victoria: float = 100.0
 
 @onready var barra_pintura: PixelBar = $BarraManchas
 @onready var label_tiempo: Label = $Tiempo
@@ -140,7 +140,7 @@ func actualizar_porcentaje_suciedad(porcentaje: float, _actuales: int, _totales:
 	if partida_terminada:
 		return
 		
-	# KIBO-29: Al alcanzar el 80%, activa la puerta de escape hacia el siguiente nivel
+	# KIBO-29: Al alcanzar el 100% (= 96 celdas, lo mismo que antes era el 80%), activa la puerta de escape hacia el siguiente nivel
 	if porcentaje >= meta_victoria:
 		_activar_escape()
 	elif _hubo_suciedad and porcentaje <= 0.0:

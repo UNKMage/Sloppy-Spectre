@@ -12,8 +12,8 @@ signal celda_limpiada(posicion_mapa: Vector2i, total_celdas_sucias: int)
 @export var atlas_ectoplasma: Vector2i = Vector2i(1, 0)
 @export var tamano_mapa: Vector2i = Vector2i(29, 17)
 
-## Meta de celdas para el 100%: 120 celdas permite una progresión justa sin llenarse al instante
-@export var celdas_para_100: int = 120
+## Celdas manchadas que equivalen al 100 % (y a ganar el nivel). 96 celdas = lo que antes era el 80 % de 120.
+@export var celdas_para_100: int = 96
 
 var _celdas_sucias: Dictionary = {}
 ## Manchas reservadas: celda (Vector2i) -> instance_id del Limpiador que va por ella.

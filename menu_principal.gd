@@ -27,6 +27,7 @@ var _fuente: Font
 func _ready() -> void:
 	# Si venimos de un Game Over, el juego estaba pausado: sin esto los botones no responderían.
 	get_tree().paused = false
+	Opciones.cargar()
 	# La fuente pixel no trae acentos: se copia y se le da la fuente normal como respaldo.
 	_fuente = FUENTE_PIXEL.duplicate()
 	_fuente.fallbacks = [ThemeDB.fallback_font]
@@ -35,6 +36,8 @@ func _ready() -> void:
 	_crear_encabezado()
 	_crear_tarjetas()
 	_crear_pie()
+	_crear_boton_opciones()
+	_crear_boton_creditos()
 	_crear_cortina()
 	_animar_entrada()
 	# Con el foco en la primera tarjeta también se puede jugar con teclado.
@@ -239,7 +242,7 @@ func _crear_pie() -> void:
 	pie.offset_top = -64.0
 	pie.offset_bottom = -40.0
 	add_child(pie)
-	var esc := _etiqueta("Esc dentro de un nivel = volver al menú", 12, Color(1, 1, 1, 0.45), 4)
+	var esc := _etiqueta("Esc dentro de un nivel = pausa", 12, Color(1, 1, 1, 0.45), 4)
 	esc.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	esc.offset_top = -36.0
 	esc.offset_bottom = -14.0
@@ -272,4 +275,41 @@ func _abrir_nivel(escena: String) -> void:
 	_entrando = true
 	var tw := create_tween()
 	tw.tween_property(_cortina, "color:a", 1.0, 0.35)
-	tw.tween_callback(func() -> void: get_tree().change_scene_to_file(escena))
+	tw.tween_callback(func() -> void:
+		# La primera vez que se entra al nivel 1 se cuenta la historia antes de jugar.
+		if escena == "res://main.tscn" and not Opciones.visto("intro"):
+			Opciones.marcar_visto("intro")
+			Historia.contar(get_tree(), "intro", escena)
+		else:
+			get_tree().change_scene_to_file(escena))
+
+
+# --- Opciones (volumen y pantalla completa) ---
+
+var _panel_opciones: PanelOpciones
+
+
+func _crear_boton_opciones() -> void:
+	var b := UIPixel.boton("OPCIONES", Color(0.56, 0.92, 1.0), Vector2(170, 46), 16)
+	b.position = Vector2(962, 584)
+	b.pressed.connect(_abrir_opciones)
+	add_child(b)
+
+
+func _abrir_opciones() -> void:
+	if _panel_opciones != null and is_instance_valid(_panel_opciones):
+		return
+	_panel_opciones = PanelOpciones.new()
+	add_child(_panel_opciones)  # el último hijo se dibuja encima de todo
+	_panel_opciones.volver.connect(func() -> void:
+		_panel_opciones.queue_free()
+		_tarjetas[0].grab_focus())
+	_panel_opciones.abrir()
+
+
+func _crear_boton_creditos() -> void:
+	var b := UIPixel.boton("CRÉDITOS", Color(1.0, 0.83, 0.3), Vector2(170, 46), 16)
+	b.position = Vector2(20, 584)
+	b.pressed.connect(func() -> void:
+		get_tree().change_scene_to_file("res://creditos.tscn"))
+	add_child(b)

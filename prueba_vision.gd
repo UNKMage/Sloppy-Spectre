@@ -66,7 +66,7 @@ func _correr() -> void:
 	var hijos_ocultos := true
 	for e in enemigos:
 		for hijo in e.get_children():
-			if hijo is CanvasItem and not (hijo as CanvasItem).use_parent_material:
+			if hijo is CanvasItem and not hijo is ReaccionesLimpiador and not (hijo as CanvasItem).use_parent_material:
 				hijos_ocultos = false
 	_comprobar(hijos_ocultos, "sprites de los enemigos usan el material de ocultar")
 

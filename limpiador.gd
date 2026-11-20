@@ -34,7 +34,7 @@ extends CharacterBody2D
 @export_group("Limpieza")
 ## Segundos que tarda en limpiar una mancha al llegar a ella
 @export var tiempo_por_mancha: float = 1.0
-@export var umbral_boost_porcentaje: float = 50.0
+@export var umbral_boost_porcentaje: float = 62.5  # 60 celdas (antes era el 50 % de 120; ahora el 100 % son 96 celdas)
 @export var multiplicador_velocidad_boost: float = 1.5
 @export var multiplicador_limpieza_boost: float = 0.6
 

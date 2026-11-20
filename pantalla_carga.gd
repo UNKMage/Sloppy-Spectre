@@ -50,6 +50,7 @@ var _saliendo := false
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	add_to_group("pantalla_carga")  # VolverAlMenu ignora Esc mientras carga
 	_fuente = FUENTE_PIXEL.duplicate()
 	_fuente.fallbacks = [ThemeDB.fallback_font]
 

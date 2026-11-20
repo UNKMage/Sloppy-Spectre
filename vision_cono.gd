@@ -67,6 +67,9 @@ func _ready() -> void:
 		estela.objetivo = enemigo as Node2D
 		estela.z_index = 2
 		get_tree().current_scene.add_child(estela)
+		# Reacciones del Limpiador (sorpresa, "?", risa, rebote al caminar): se ven siempre.
+		var reacciones := ReaccionesLimpiador.new()
+		enemigo.add_child(reacciones)
 
 
 ## Reemplaza el dibujo cuadrado de CapaEctoplasma por manchas orgánicas con salpicaduras.

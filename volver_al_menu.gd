@@ -1,5 +1,9 @@
 extends Node
-## Autoload: está activo en TODAS las escenas. Con Esc regresa al menú principal.
+## Autoload: está activo en TODAS las escenas. Maneja la tecla Esc:
+##   - Dentro de un nivel: abre el menú de pausa (ya no se pierde la partida por accidente).
+##   - En las pantallas de fin de partida: vuelve al menú principal.
+##   - En el menú principal: no hace nada.
+## También carga las opciones guardadas (volumen y pantalla completa) al abrir el juego.
 
 const MENU := "res://menu_principal.tscn"
 
@@ -7,6 +11,7 @@ const MENU := "res://menu_principal.tscn"
 func _ready() -> void:
 	# SIEMPRE = sigue funcionando aunque el juego esté en pausa (por ejemplo, tras el Game Over).
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	Opciones.cargar()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -16,5 +21,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	# Si ya estamos en el menú, Esc no hace nada.
 	if escena == null or escena.scene_file_path == MENU:
 		return
-	get_tree().paused = false  # el HUD pausa el juego al terminar; hay que despausar
-	get_tree().change_scene_to_file(MENU)
+	# El menú de pausa y la pantalla de carga manejan su propio Esc.
+	if get_tree().get_first_node_in_group("pausa") or get_tree().get_first_node_in_group("pantalla_carga"):
+		return
+	var hud := get_tree().get_first_node_in_group("hud")
+	if hud and hud.get("partida_terminada"):
+		# Partida terminada (victoria o game over): Esc vuelve al menú, como dicen esas pantallas.
+		get_tree().paused = false
+		get_tree().change_scene_to_file(MENU)
+	else:
+		MenuPausa.abrir(get_tree())

@@ -7,6 +7,9 @@ extends Node
 ## Se agrega al nivel y se elige qué boosts hay con las casillas de abajo.
 
 const FUENTE_PIXEL := preload("res://addons/pixel_bars/font/pixel_ui_font.fnt")
+
+## Aviso de que apareció un orbe (lo usa el tutorial para explicarlo la primera vez).
+signal orbe_aparecio(tipo: int, posicion: Vector2)
 const NOMBRES := {
 	Boost.Tipo.ECTOPLASMA: "ECTOPLASMA INFINITO",
 	Boost.Tipo.INMUNIDAD: "INMUNIDAD",
@@ -22,9 +25,9 @@ const NOMBRES := {
 ## Zona del mapa donde pueden aparecer los orbes.
 @export var zona: Rect2 = Rect2(90, 120, 972, 450)
 ## Espera antes del primer orbe (mínimo, máximo).
-@export var primera_espera: Vector2 = Vector2(5.0, 10.0)
+@export var primera_espera: Vector2 = Vector2(4.0, 8.0)
 ## Espera entre un orbe y el siguiente del mismo tipo (mínimo, máximo).
-@export var espera_entre_orbes: Vector2 = Vector2(12.0, 20.0)
+@export var espera_entre_orbes: Vector2 = Vector2(9.0, 15.0)
 ## Segundos que un orbe espera en el mapa antes de desaparecer.
 @export var vida_orbe: float = 15.0
 ## Capas físicas que bloquean un orbe (paredes).
@@ -96,6 +99,7 @@ func _aparecer(tipo: int) -> void:
 	b.expirado.connect(_on_expirado)
 	get_parent().add_child(b)
 	_orbe[tipo] = b
+	orbe_aparecio.emit(tipo, b.position)
 
 
 ## Busca un punto al azar: con suelo, lejos de las paredes y a distancia de Spooky.
@@ -139,10 +143,12 @@ func _on_expirado(tipo: int) -> void:
 
 func _on_recogido(tipo: int, posicion: Vector2) -> void:
 	_orbe[tipo] = null
-	_espera[tipo] = _duracion[tipo] + randf_range(espera_entre_orbes.x, espera_entre_orbes.y)
+	_espera[tipo] = _duracion[tipo] * 0.5 + randf_range(espera_entre_orbes.x, espera_entre_orbes.y)
 	_restante[tipo] = _duracion[tipo]
 	_aplicar(tipo, true)
 	_destello(tipo, posicion)
+	GameFeel.sacudir(get_tree(), 5.0, 0.2)
+	GameFeel.destello(get_tree(), Color(0.7, 1.0, 0.8, 0.25) if tipo == Boost.Tipo.ECTOPLASMA else Color(0.6, 0.85, 1.0, 0.25), 0.3)
 
 
 # --- Efectos sobre Spooky ---

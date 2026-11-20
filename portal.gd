@@ -53,7 +53,7 @@ func _process(delta: float) -> void:
 			if _hud and _hud.has_method("mostrar_aviso"):
 				_hud.mostrar_aviso("Inmunidad terminada")
 				
-				var timer_ocultar := get_tree().create_timer(2.0)
+				var timer_ocultar := get_tree().create_timer(2.0, false)
 				timer_ocultar.timeout.connect(func():
 					if _hud and _hud.has_method("ocultar_aviso"):
 						_hud.ocultar_aviso()
