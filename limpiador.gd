@@ -71,13 +71,17 @@ var _navegacion_lista: bool = false
 #Espera dos fotogramas antes de pedir las rutas, en caso de latencia al sincronizar
 func _ready() -> void:
 	add_to_group("enemigos")  # la visión de Spooky busca a los enemigos por este grupo
-	await get_tree().physics_frame
-	await get_tree().physics_frame
-	_navegacion_lista = true
-	
+	# Las señales del portal se conectan YA, antes de esperar: Spooky aparece dentro del portal
+	# en el primer frame y, si nos conectábamos después, nunca nos enterábamos de que entró
+	# (y los Limpiadores lo atrapaban sin respetar la inmunidad de inicio).
 	if _portal:
 		_portal.jugador_entro.connect(_on_jugador_entro_portal)
 		_portal.jugador_salio.connect(_on_jugador_salio_portal)
+		if _portal.has_method("jugador_dentro"):
+			_jugador_en_portal = _portal.jugador_dentro()
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	_navegacion_lista = true
 
 func _exit_tree() -> void:
 	if _suelo:
@@ -140,8 +144,8 @@ func _actualizar_direccion_mirada(delta: float) -> void:
 
 ## ¿Está Spooky dentro del cono de luz? Revisa alcance, ángulo y que ninguna pared tape la luz.
 func _spooky_en_cono_de_luz() -> bool:
-	# El Portal es zona segura: dentro de él la linterna no lo detecta.
-	if _jugador == null or _jugador_en_portal:
+	# El Portal es zona segura mientras dure su inmunidad: ahí la linterna no lo detecta.
+	if _jugador == null or _esta_protegido_por_portal():
 		return false
 
 	var hacia_spooky := _jugador.global_position - global_position

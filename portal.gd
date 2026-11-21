@@ -85,6 +85,11 @@ func _process(delta: float) -> void:
 func tiene_inmunidad_activa() -> bool:
 	return _inmunidad_activa
 
+
+## ¿Está Spooky dentro del portal ahora mismo? (para quien se conecte tarde a las señales)
+func jugador_dentro() -> bool:
+	return _jugador != null
+
 func _on_area_entered(area: Area2D) -> void:
 	if area.is_in_group("jugador"):
 		_jugador = area
