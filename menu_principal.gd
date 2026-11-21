@@ -28,11 +28,7 @@ func _ready() -> void:
 	# Si venimos de un Game Over, el juego estaba pausado: sin esto los botones no responderían.
 	get_tree().paused = false
 	Opciones.cargar()
-	# Al abrir el juego siempre se cuenta la historia antes del menú.
-	if not Historia.inicio_mostrado:
-		Historia.inicio_mostrado = true
-		Historia.contar.call_deferred(get_tree(), "intro", "res://menu_principal.tscn")
-		return
+	# La historia de introducción ahora la lanza el botón JUGAR de la pantalla de inicio (inicio.gd).
 	# La fuente pixel no trae acentos: se copia y se le da la fuente normal como respaldo.
 	_fuente = FUENTE_PIXEL.duplicate()
 	_fuente.fallbacks = [ThemeDB.fallback_font]
@@ -43,6 +39,7 @@ func _ready() -> void:
 	_crear_pie()
 	_crear_boton_opciones()
 	_crear_boton_creditos()
+	_crear_boton_salir()
 	_crear_cortina()
 	_animar_entrada()
 	# Con el foco en la primera tarjeta también se puede jugar con teclado.
@@ -316,4 +313,19 @@ func _crear_boton_creditos() -> void:
 	b.position = Vector2(20, 584)
 	b.pressed.connect(func() -> void:
 		get_tree().change_scene_to_file("res://creditos.tscn"))
+	add_child(b)
+
+
+## SALIR (arriba a la derecha): cierra el juego con un fundido.
+func _crear_boton_salir() -> void:
+	var b := UIPixel.boton("SALIR", Color(1.0, 0.55, 0.42), Vector2(150, 46), 16)
+	b.position = Vector2(982, 20)
+	b.pressed.connect(func() -> void:
+		if _entrando:
+			return
+		_entrando = true
+		Opciones.guardar()
+		var tw := create_tween()
+		tw.tween_property(_cortina, "color:a", 1.0, 0.35)
+		tw.tween_callback(get_tree().quit))
 	add_child(b)

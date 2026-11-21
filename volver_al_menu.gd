@@ -28,8 +28,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not event.is_action_pressed("ui_cancel"):
 		return
 	var escena := get_tree().current_scene
-	# Si ya estamos en el menú, Esc no hace nada.
-	if escena == null or escena.scene_file_path == MENU:
+	# Si ya estamos en el menú o en la pantalla de inicio, Esc no hace nada.
+	if escena == null or escena.scene_file_path in [MENU, "res://inicio.tscn"]:
 		return
 	# El menú de pausa y la pantalla de carga manejan su propio Esc.
 	if get_tree().get_first_node_in_group("pausa") or get_tree().get_first_node_in_group("pantalla_carga"):

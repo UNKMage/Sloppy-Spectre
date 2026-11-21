@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Sloppy_Spectre"
-run/main_scene="res://menu_principal.tscn"
+run/main_scene="res://inicio.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
 

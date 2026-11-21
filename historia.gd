@@ -29,8 +29,6 @@ const PAGINAS := {
 	],
 }
 
-## true cuando ya se mostró la introducción al abrir el juego (una vez por ejecución).
-static var inicio_mostrado: bool = false
 static var _id: String = "intro"
 static var _siguiente: String = "res://main.tscn"
 
@@ -287,6 +285,10 @@ func _terminar() -> void:
 	if _saliendo:
 		return
 	_saliendo = true
+	# Ya se presentó la introducción (completa o saltada con Esc): la próxima vez que se pulse
+	# JUGAR en la pantalla de inicio se va directo al menú de niveles.
+	if _id == "intro":
+		Opciones.marcar_visto("intro")
 	var tw := create_tween()
 	tw.tween_property(_cortina, "color:a", 1.0, 0.5)
 	tw.tween_callback(func() -> void:
