@@ -1,6 +1,6 @@
 extends Control
 ## Pantalla de inicio: la portada del juego con solo dos botones.
-##   JUGAR -> la primera vez cuenta la historia (introducción) y de ahí pasa al menú de niveles;
+##   JUGAR -> siempre cuenta la historia (introducción) y de ahí pasa al menú de niveles;
 ##            después va directo al menú de niveles.
 ##   SALIR -> cierra el juego.
 ## Se maneja con mouse o teclado (flechas + Enter).
@@ -147,12 +147,8 @@ func _jugar() -> void:
 	var tw := create_tween()
 	tw.tween_property(_cortina, "color:a", 1.0, 0.4)
 	tw.tween_callback(func() -> void:
-		# La primera vez se cuenta la historia y de ahí al menú de niveles. Una vez vista
-		# (se guarda en user://opciones.cfg), JUGAR va directo al menú de niveles.
-		if Opciones.visto("intro"):
-			get_tree().change_scene_to_file(MENU)
-		else:
-			Historia.contar(get_tree(), "intro", MENU))
+		# JUGAR siempre cuenta la historia de introducción (Esc la salta) y de ahí va al menú de niveles.
+		Historia.contar(get_tree(), "intro", MENU))
 
 
 func _salir() -> void:

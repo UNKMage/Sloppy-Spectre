@@ -278,8 +278,8 @@ func _abrir_nivel(escena: String) -> void:
 	var tw := create_tween()
 	tw.tween_property(_cortina, "color:a", 1.0, 0.35)
 	tw.tween_callback(func() -> void:
-		# La primera vez (o tras "Repetir tutorial") el nivel 1 va precedido del tutorial.
-		if escena == "res://main.tscn" and not Opciones.visto("tutorial_basico"):
+		# El nivel 1 siempre va precedido del tutorial (T lo salta).
+		if escena == "res://main.tscn":
 			get_tree().change_scene_to_file("res://tutorial_nivel.tscn")
 		else:
 			get_tree().change_scene_to_file(escena))
